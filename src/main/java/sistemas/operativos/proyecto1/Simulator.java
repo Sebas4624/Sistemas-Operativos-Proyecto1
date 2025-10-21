@@ -23,7 +23,7 @@ public class Simulator {
     public void startSimulation() {
         switch(config.getPolicy()) {
             case PlanPolicy.FCFS -> {
-                System.out.print("First-Come, First-Served");  ///////////////////////////
+                System.out.println("First-Come, First-Served");  ///////////////////////////
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     cpu.simulateCycleFCFS();
                     System.out.print("Ciclo: ");  ///////////////////////////
@@ -31,7 +31,7 @@ public class Simulator {
                 }
             }
             case RR -> {
-                System.out.print("Round Robin");  ///////////////////////////
+                System.out.println("Round Robin");  ///////////////////////////
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     cpu.simulateCycleRR();
                     System.out.print("Ciclo: ");  ///////////////////////////
@@ -43,6 +43,12 @@ public class Simulator {
             case SRT -> {
             }
             case PRI -> {
+                System.out.println("Cola por prioridad");  ///////////////////////////
+                for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    cpu.simulateCyclePRI();
+                    System.out.print("Ciclo: ");  ///////////////////////////
+                    System.out.println(i);  ///////////////////////////
+                }
             }
             case MFQ -> {
             }
@@ -51,6 +57,9 @@ public class Simulator {
     }
     
     public void createProcess(String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
-        cpu.createProcess(name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
+        switch(config.getPolicy()) {
+            case PRI -> cpu.createPriorityProcess(name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
+            default -> cpu.createProcess(name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
+        }
     }
 }

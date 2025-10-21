@@ -4,7 +4,7 @@ package sistemas.operativos.proyecto1.process;
  *
  * @author Sebastián
  */
-public class Process {
+public class Process implements Comparable<Process> {
     private final String id;
     private final String name;
     private final int arrivalTime;
@@ -112,6 +112,12 @@ public class Process {
     public void setFinishTime(int t) { finishTime = t; }
 
     public boolean finished() { return remainingInstructions == 0; }
+
+    @Override
+    public int compareTo(Process o) {
+        //return Integer.compare(this.priority, o.priority());
+        return Integer.compare(o.priority(), this.priority);
+    }
 
     @Override
     public String toString() {

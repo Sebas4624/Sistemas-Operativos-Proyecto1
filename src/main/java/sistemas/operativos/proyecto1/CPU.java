@@ -1,7 +1,9 @@
 package sistemas.operativos.proyecto1;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import sistemas.operativos.proyecto1.lib.Queue;
+import sistemas.operativos.proyecto1.lib.PriorityQueue;
 import sistemas.operativos.proyecto1.process.Process;
 import sistemas.operativos.proyecto1.process.ProcessType;
 
@@ -11,6 +13,7 @@ import sistemas.operativos.proyecto1.process.ProcessType;
  */
 public class CPU {
     private final Queue<Process> readyQueue;
+    private final PriorityQueue<Process> readyPriorityQueue;
     private final Queue<Process> ioQueue;
     private Process currentProcess;
     private final Config config;
@@ -18,6 +21,7 @@ public class CPU {
     
     public CPU(Config config) {
         this.readyQueue = new Queue();
+        this.readyPriorityQueue = new PriorityQueue();
         this.ioQueue = new Queue();
         this.config = config;
         this.simulationTime = 0;
@@ -29,6 +33,16 @@ public class CPU {
         
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
         readyQueue.enqueue(process);
+        
+        System.out.println("Proceso creado: " + name);  ///////////////////////////
+    }
+    
+    // Método para crear procesos con prioridad
+    public void createPriorityProcess(String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
+        String id = java.time.LocalTime.now().toString();
+        
+        Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
+        readyPriorityQueue.add(process);
         
         System.out.println("Proceso creado: " + name);  ///////////////////////////
     }
@@ -64,8 +78,8 @@ public class CPU {
             
             if (currentProcess.isBlockedIO()) {
                 ioQueue.enqueue(currentProcess);
-                currentProcess = null;
                 System.out.println("Proceso " + currentProcess.name() +  " bloqueado.");  ///////////////////////////
+                currentProcess = null;
             } else if (currentProcess.isFinished()) {
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
@@ -129,7 +143,49 @@ public class CPU {
     
     /**
      *
-     *   Funciones para IO y planificar nuevos procesos
+     *   Política de Planificación PRI (Por prioridades; mayor número, mayor prioridad)
+     *
+     */
+    
+    public void simulateCyclePRI() {
+        simulationTime++;
+        
+        // 1. Procesar I/O
+        processIOPriorityQueue();
+        
+        // 2. Planificar siguiente proceso (si no hay uno actual)
+        if (currentProcess == null || currentProcess.isFinished() || 
+            currentProcess.isBlockedIO()) {
+            scheduleNextPriorityProcess();
+        }
+        
+        // 3. Ejecutar proceso actual
+        if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
+            currentProcess.setRunning();
+            boolean executed = currentProcess.executeInstruction();
+            //System.out.println("Instrucción ejecutada");  ///////////////////////////
+            
+            if (currentProcess.isBlockedIO()) {
+                ioQueue.enqueue(currentProcess);
+                System.out.println("Proceso " + currentProcess.name() +  " bloqueado.");  ///////////////////////////
+                currentProcess = null;
+            } else if (currentProcess.isFinished()) {
+                System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
+                currentProcess = null;
+            }
+        }
+        
+        // 4. Esperar según la duración del ciclo configurada
+        try {
+            Thread.sleep(config.getCycleDuration());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+    
+    /**
+     *
+     *   Manejadores de procesos e IO
      *
      */
     
@@ -151,6 +207,30 @@ public class CPU {
     private void scheduleNextProcess() {
         if (!readyQueue.isEmpty()) {
             currentProcess = readyQueue.dequeue();
+        }
+    }
+    
+    private void processIOPriorityQueue() {
+        Iterator<Process> iterator = ioQueue.iterator();
+        while (iterator.hasNext()) {
+            Process process = iterator.next();
+            boolean ioCompleted = process.processIOCycle();
+            
+            if (ioCompleted) {
+                ioQueue.dequeue();
+                readyPriorityQueue.add(process);
+                System.out.println("I/O completado para: " + process.name() + ". Poniendo en cola de listos.");
+            }
+        }
+    }
+    
+    private void scheduleNextPriorityProcess() {
+        if (!readyPriorityQueue.isEmpty()) {
+            try {
+                currentProcess = readyPriorityQueue.poll();
+            } catch (NoSuchElementException e) {
+                System.out.println("Error polling the queue: " + e.toString());
+            }
         }
     }
 }

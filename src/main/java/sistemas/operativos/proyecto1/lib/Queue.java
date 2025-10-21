@@ -20,6 +20,8 @@ public class Queue<T> {
 
     public boolean isEmpty() { return list.isEmpty(); }
 
+    public java.util.Iterator<T> iterator() { return list.iterator(); }
+    
     @Override
     public String toString() { return list.toString(); }
 }

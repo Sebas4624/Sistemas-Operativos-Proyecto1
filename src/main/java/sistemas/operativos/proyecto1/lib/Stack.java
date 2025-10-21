@@ -19,6 +19,8 @@ public class Stack<T> {
     public int size() { return list.size(); }
 
     public boolean isEmpty() { return list.isEmpty(); }
+    
+    public java.util.Iterator<T> iterator() { return list.iterator(); }
 
     @Override
     public String toString() { return list.toString(); }

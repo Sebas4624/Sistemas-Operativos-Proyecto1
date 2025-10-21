@@ -10,7 +10,7 @@ public class Process {
     private final int arrivalTime;
     private final int instructions;
     private int remainingInstructions;
-    private ProcessState currentState;
+    private ProcessState currentState = ProcessState.READY;
     private final ProcessType type;
     private final int cyclesForException;
     private final int cyclesToSatisfy;
@@ -24,7 +24,6 @@ public class Process {
         this.arrivalTime = arrivalTime;
         this.instructions = instructions;
         this.remainingInstructions = instructions;
-        this.currentState = ProcessState.READY;
         this.type = type;
         this.cyclesForException = cyclesForException;
         this.cyclesToSatisfy = cyclesToSatisfy;
@@ -59,13 +58,28 @@ public class Process {
         return false;
     }
     
+    public boolean processIOCycle() {
+        if (currentState == ProcessState.BLOCKED) {
+            cyclesInIO++;
+            if (cyclesInIO >= cyclesToSatisfy) {
+                currentState = ProcessState.READY;
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public ProcessState currentState() { return currentState; }
     public boolean isFinished() {
-        return currentState == ProcessState.FINISHED;
+        return currentState == ProcessState.FINISHED || remainingInstructions <= 0;
     }
     
     public boolean isBlockedIO() {
         return currentState == ProcessState.BLOCKED;
+    }
+    
+    public boolean isRunning() {
+        return currentState == ProcessState.RUNNING;
     }
     
     public boolean isReady() {

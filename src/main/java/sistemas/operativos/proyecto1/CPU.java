@@ -35,7 +35,7 @@ public class CPU {
     
     /**
      *
-     *   Política de Planificación FCFS
+     *   Política de Planificación FCFS (First-Come First-Served)
      *
      */
     
@@ -65,9 +65,9 @@ public class CPU {
             if (currentProcess.isBlockedIO()) {
                 ioQueue.enqueue(currentProcess);
                 currentProcess = null;
-                //System.out.println("Proceso bloqueado");  ///////////////////////////
+                System.out.println("Proceso " + currentProcess.name() +  " bloqueado.");  ///////////////////////////
             } else if (currentProcess.isFinished()) {
-                System.out.println("Proceso " + currentProcess.name() + " terminado.");
+                System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
             }
         }
@@ -82,12 +82,49 @@ public class CPU {
     
     /**
      *
-     *   Política de Planificación FCFS
+     *   Política de Planificación RR (Round Robin)
      *
      */
     
     public void simulateCycleRR() {
+        simulationTime++;
         
+        // 1. Procesar I/O
+        processIOQueue();
+        
+        // 2. Planificar siguiente proceso (si no hay uno actual)
+        if (currentProcess == null || currentProcess.isFinished() || 
+            currentProcess.isBlockedIO()) {
+            scheduleNextProcess();
+        }
+        
+        // 3. Ejecutar proceso actual
+        if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
+            currentProcess.setRunning();
+            boolean executed = currentProcess.executeInstruction();
+            config.reduceRemainingQuantum();
+            
+            if (config.getRemainingQuantum() == 0) {
+                readyQueue.enqueue(currentProcess);
+                config.resetRemainingQuantum();
+                System.out.println("Quantum del proceso " + currentProcess.name() + " terminado. Volviendo a poner en cola de listos.");  ///////////////////////////
+                currentProcess = null;
+            } else if (currentProcess.isBlockedIO()) {
+                ioQueue.enqueue(currentProcess);
+                System.out.println("Proceso " + currentProcess.name() +  " bloqueado.");  ///////////////////////////
+                currentProcess = null;
+            } else if (currentProcess.isFinished()) {
+                System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
+                currentProcess = null;
+            }
+        }
+        
+        // 4. Esperar según la duración del ciclo configurada
+        try {
+            Thread.sleep(config.getCycleDuration());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
     
     /**
@@ -106,7 +143,7 @@ public class CPU {
                 // iterator.remove();
                 ioQueue.dequeue();
                 readyQueue.enqueue(process);
-                System.out.println("I/O completado para: " + process.name());
+                System.out.println("I/O completado para: " + process.name() + ". Poniendo en cola de listos.");
             }
         }
     }

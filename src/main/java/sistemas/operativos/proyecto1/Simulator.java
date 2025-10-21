@@ -23,13 +23,20 @@ public class Simulator {
     public void startSimulation() {
         switch(config.getPolicy()) {
             case PlanPolicy.FCFS -> {
+                System.out.print("First-Come, First-Served");  ///////////////////////////
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     cpu.simulateCycleFCFS();
-                    System.out.print("Cycle: ");  ///////////////////////////
+                    System.out.print("Ciclo: ");  ///////////////////////////
                     System.out.println(i);  ///////////////////////////
                 }
             }
             case RR -> {
+                System.out.print("Round Robin");  ///////////////////////////
+                for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    cpu.simulateCycleRR();
+                    System.out.print("Ciclo: ");  ///////////////////////////
+                    System.out.println(i);  ///////////////////////////
+                }
             }
             case SPN -> {
             }

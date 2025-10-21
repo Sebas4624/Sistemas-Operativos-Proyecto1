@@ -10,7 +10,8 @@ import sistemas.operativos.proyecto1.process.ProcessType;
 public class Proyecto1 {
 
     public static void main(String[] args) {
-        Config config = new Config(200, PlanPolicy.FCFS);
+        //Config config = new Config(200, PlanPolicy.FCFS);
+        Config config = new Config(200, 100, PlanPolicy.RR, 20);
         Simulator sim = new Simulator(config);
         
         // Crear procesos de ejemplo

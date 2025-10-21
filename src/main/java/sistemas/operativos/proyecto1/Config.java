@@ -9,29 +9,31 @@ public class Config {
     private long cycleDuration;
     private final String configFile = "system_config.json";
     private final PlanPolicy policy;
+    private final int quantum;  // "Quantum" en forma de "ciclos"
+    private int remainingQuantum;
+    
+    public Config() {
+        this.cyclesAmount = 100;
+        this.cycleDuration = 100; // default: 100ms
+        this.policy = PlanPolicy.FCFS;
+        this.quantum = 20;
+        this.remainingQuantum = 20;
+    }
     
     public Config(int cyclesAmount) {
         this.cyclesAmount = cyclesAmount;
         this.cycleDuration = 100; // default: 100ms
         this.policy = PlanPolicy.FCFS;
+        this.quantum = 20;
+        this.remainingQuantum = 20;
     }
     
-    public Config(int cyclesAmount, long initialCycleDuration) {
-        this.cyclesAmount = cyclesAmount;
-        this.cycleDuration = initialCycleDuration;
-        this.policy = PlanPolicy.FCFS;
-    }
-    
-    public Config(int cyclesAmount, PlanPolicy policy) {
-        this.cyclesAmount = cyclesAmount;
-        this.cycleDuration = 100;
-        this.policy = policy;
-    }
-    
-    public Config(int cyclesAmount, long initialCycleDuration, PlanPolicy policy) {
+    public Config(int cyclesAmount, long initialCycleDuration, PlanPolicy policy, int quantum) {
         this.cyclesAmount = cyclesAmount;
         this.cycleDuration = initialCycleDuration;
         this.policy = policy;
+        this.quantum = quantum;
+        this.remainingQuantum = quantum;
     }
     /*
     // Guardar configuración
@@ -69,4 +71,9 @@ public class Config {
     }
     
     public PlanPolicy getPolicy() { return policy; }
+    
+    public int getQuantum() { return quantum; }
+    public int getRemainingQuantum() { return remainingQuantum; }
+    public void reduceRemainingQuantum() { remainingQuantum--; }
+    public void resetRemainingQuantum() { remainingQuantum = quantum; }
 }

@@ -8,15 +8,30 @@ public class Config {
     private int cyclesAmount;
     private long cycleDuration;
     private final String configFile = "system_config.json";
+    private final PlanPolicy policy;
     
     public Config(int cyclesAmount) {
         this.cyclesAmount = cyclesAmount;
         this.cycleDuration = 100; // default: 100ms
+        this.policy = PlanPolicy.FCFS;
     }
     
     public Config(int cyclesAmount, long initialCycleDuration) {
         this.cyclesAmount = cyclesAmount;
         this.cycleDuration = initialCycleDuration;
+        this.policy = PlanPolicy.FCFS;
+    }
+    
+    public Config(int cyclesAmount, PlanPolicy policy) {
+        this.cyclesAmount = cyclesAmount;
+        this.cycleDuration = 100;
+        this.policy = policy;
+    }
+    
+    public Config(int cyclesAmount, long initialCycleDuration, PlanPolicy policy) {
+        this.cyclesAmount = cyclesAmount;
+        this.cycleDuration = initialCycleDuration;
+        this.policy = policy;
     }
     /*
     // Guardar configuración
@@ -52,4 +67,6 @@ public class Config {
     public void getCyclesAmount(int cyclesAmount) {
         this.cyclesAmount = cyclesAmount;
     }
+    
+    public PlanPolicy getPolicy() { return policy; }
 }

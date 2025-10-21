@@ -14,11 +14,12 @@ public class Process {
     private final ProcessType type;
     private final int cyclesForException;
     private final int cyclesToSatisfy;
+    private final int priority;
     private Integer startTime = null;
     private Integer finishTime = null;
     private Integer cyclesInIO;
 
-    public Process(String id, String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy) {
+    public Process(String id, String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
         this.id = id;
         this.name = name;
         this.arrivalTime = arrivalTime;
@@ -27,6 +28,7 @@ public class Process {
         this.type = type;
         this.cyclesForException = cyclesForException;
         this.cyclesToSatisfy = cyclesToSatisfy;
+        this.priority = priority;
         this.cyclesInIO = 0;
     }
 
@@ -35,6 +37,7 @@ public class Process {
     public int arrival() { return arrivalTime; }
     public int instructions() { return instructions; }
     public int remaining() { return remainingInstructions; }
+    public int priority() { return priority; }
 
     public boolean executeInstruction() {
         if (remainingInstructions > 0 && currentState == ProcessState.RUNNING) {

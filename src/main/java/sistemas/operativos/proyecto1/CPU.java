@@ -29,9 +29,10 @@ public class CPU {
         // 1. Procesar I/O
         processIOQueue();
         
-        //System.out.println(currentProcess);  ////
-        //if (currentProcess != null) System.out.println(currentProcess.currentState());  ////
-        //if (currentProcess != null) System.out.println(currentProcess.remaining());  ////
+        //System.out.println(currentProcess);  ///////////////////////////
+        //if (currentProcess != null) System.out.println(currentProcess.currentState());  ///////////////////////////
+        //if (currentProcess != null) System.out.println(currentProcess.remaining());  ///////////////////////////
+        //if (currentProcess != null) System.out.println(currentProcess.toString());  ///////////////////////////
         
         // 2. Planificar siguiente proceso (si no hay uno actual)
         if (currentProcess == null || currentProcess.isFinished() || 
@@ -43,12 +44,12 @@ public class CPU {
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
             currentProcess.setRunning();
             boolean executed = currentProcess.executeInstruction();
-            System.out.println("Instrucción ejecutada");  ////
+            //System.out.println("Instrucción ejecutada");  ///////////////////////////
             
             if (currentProcess.isBlockedIO()) {
                 ioQueue.enqueue(currentProcess);
                 currentProcess = null;
-                System.out.println("Proceso bloqueado");  ////
+                //System.out.println("Proceso bloqueado");  ///////////////////////////
             } else if (currentProcess.isFinished()) {
                 System.out.println("Proceso " + currentProcess.name() + " terminado.");
                 currentProcess = null;
@@ -85,12 +86,12 @@ public class CPU {
     }
     
     // Método para crear procesos
-    public void createProcess(String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy) {
-        String id = java.time.LocalDate.now().toString();
+    public void createProcess(String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
+        String id = java.time.LocalTime.now().toString();
         
-        Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy);
+        Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
         readyQueue.enqueue(process);
         
-        System.out.println("Proceso creado: " + name);
+        System.out.println("Proceso creado: " + name);  ///////////////////////////
     }
 }

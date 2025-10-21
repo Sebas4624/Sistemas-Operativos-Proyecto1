@@ -26,7 +26,7 @@ public class Proyecto1 {
         // CPU Bound: 40 instrucciones, sin I/O
         sim.createProcess("Proceso_CPU_3", 0, 40, ProcessType.CPU_BOUND, 0, 0, 5);
         
-        // I/O Bound: 20 instrucciones, I/O cada 10 ciclos, servicio de 3 ciclos
+        // I/O Bound: 20 instrucciones, I/O cada 5 ciclos, servicio de 5 ciclos
         sim.createProcess("Proceso_IO_2", 0, 30, ProcessType.IO_BOUND, 5, 5, 2);
         
         // Start Simulation

@@ -23,7 +23,23 @@ public class CPU {
         this.simulationTime = 0;
     }
     
-    public void simulateCycle() {
+    // Método para crear procesos
+    public void createProcess(String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
+        String id = java.time.LocalTime.now().toString();
+        
+        Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
+        readyQueue.enqueue(process);
+        
+        System.out.println("Proceso creado: " + name);  ///////////////////////////
+    }
+    
+    /**
+     *
+     *   Política de Planificación FCFS
+     *
+     */
+    
+    public void simulateCycleFCFS() {
         simulationTime++;
         
         // 1. Procesar I/O
@@ -64,6 +80,22 @@ public class CPU {
         }
     }
     
+    /**
+     *
+     *   Política de Planificación FCFS
+     *
+     */
+    
+    public void simulateCycleRR() {
+        
+    }
+    
+    /**
+     *
+     *   Funciones para IO y planificar nuevos procesos
+     *
+     */
+    
     private void processIOQueue() {
         Iterator<Process> iterator = ioQueue.iterator();
         while (iterator.hasNext()) {
@@ -83,15 +115,5 @@ public class CPU {
         if (!readyQueue.isEmpty()) {
             currentProcess = readyQueue.dequeue();
         }
-    }
-    
-    // Método para crear procesos
-    public void createProcess(String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
-        String id = java.time.LocalTime.now().toString();
-        
-        Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
-        readyQueue.enqueue(process);
-        
-        System.out.println("Proceso creado: " + name);  ///////////////////////////
     }
 }

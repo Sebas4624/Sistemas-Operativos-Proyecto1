@@ -1,0 +1,56 @@
+[
+    {
+        "name": "Proceso_CPU_1",
+        "arrivalTime": 0,
+        "intructions": 35,
+        "type": "CPU_BOUND",
+        "cyclesForException": 0,
+        "cyclesToSatisfy": 0,
+        "priority": 5
+    },
+    {
+        "name": "Proceso_CPU_2",
+        "arrivalTime": 0,
+        "intructions": 50,
+        "type": "CPU_BOUND",
+        "cyclesForException": 0,
+        "cyclesToSatisfy": 0,
+        "priority": 7
+    },
+    {
+        "name": "Proceso_IO_1",
+        "arrivalTime": 0,
+        "intructions": 25,
+        "type": "IO_BOUND",
+        "cyclesForException": 15,
+        "cyclesToSatisfy": 4,
+        "priority": 3
+    },
+    {
+        "name": "Proceso_IO_2",
+        "arrivalTime": 0,
+        "intructions": 30,
+        "type": "CPU_BOUND",
+        "cyclesForException": 10,
+        "cyclesToSatisfy": 6,
+        "priority": 9
+    },
+    {
+        "name": "Proceso_CPU_3",
+        "arrivalTime": 0,
+        "intructions": 20,
+        "type": "CPU_BOUND",
+        "cyclesForException": 0,
+        "cyclesToSatisfy": 0,
+        "priority": 3
+    },
+    {
+        "name": "Proceso_IO_3",
+        "arrivalTime": 0,
+        "intructions": 40,
+        "type": "CPU_BOUND",
+        "cyclesForException": 5,
+        "cyclesToSatisfy": 4,
+        "priority": 1
+    }
+]

@@ -21,10 +21,25 @@ public class Simulator {
     }
     
     public void startSimulation() {
-        for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
-            cpu.simulateCycle();
-            System.out.print("Cycle: ");  ///////////////////////////
-            System.out.println(i);  ///////////////////////////
+        switch(config.getPolicy()) {
+            case PlanPolicy.FCFS -> {
+                for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    cpu.simulateCycleFCFS();
+                    System.out.print("Cycle: ");  ///////////////////////////
+                    System.out.println(i);  ///////////////////////////
+                }
+            }
+            case RR -> {
+            }
+            case SPN -> {
+            }
+            case SRT -> {
+            }
+            case PRI -> {
+            }
+            case MFQ -> {
+            }
+            default -> throw new AssertionError(config.getPolicy().name());
         }
     }
     

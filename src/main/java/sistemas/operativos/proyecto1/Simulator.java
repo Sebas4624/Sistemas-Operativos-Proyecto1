@@ -3,23 +3,34 @@ package sistemas.operativos.proyecto1;
 import sistemas.operativos.proyecto1.process.ProcessType;
 
 /**
- *
+ * Clase simulador del proyecto.
  * @author Sebastián
  */
 public class Simulator {
     private Config config;
     private CPU cpu = new CPU(config);
     
+    /**
+     * Constructor.
+     */
     public Simulator() {
         this.config = new Config(100);
         this.cpu = new CPU(config);
     }
     
+    /**
+     * Constructor.
+     * @param config Configuración del simulador.
+     */
     public Simulator(Config config) {
         this.config = config;
         this.cpu = new CPU(config);
     }
     
+    /**
+     * Inicia la simulación, ejecutando la función de ejecución de ciclo
+     * adecuada, dependiendo de la política de planificación actual.
+     */
     public void startSimulation() {
         switch(config.getPolicy()) {
             case PlanPolicy.FCFS -> {
@@ -56,6 +67,17 @@ public class Simulator {
         }
     }
     
+    /**
+     * Crea un proceso dentro del simulador para ser usado y ejecutado dentro
+     * del procesador.
+     * @param name Nombre del proceso.
+     * @param arrivalTime Tiempo de llegada del proceso.
+     * @param instructions Cantidad de instrucciones del proceso.
+     * @param type Tipo de proceso [CPU_BOUND - IO_BOUND].
+     * @param cyclesForException Ciclos necesarios para generar una excepción.
+     * @param cyclesToSatisfy Ciclos necesarios para satisfacer dicha excepción.
+     * @param priority Nivel de prioridad del proceso.
+     */
     public void createProcess(String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
         switch(config.getPolicy()) {
             case PRI -> cpu.createPriorityProcess(name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);

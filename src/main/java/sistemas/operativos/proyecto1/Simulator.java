@@ -23,19 +23,19 @@ public class Simulator {
     public void startSimulation() {
         switch(config.getPolicy()) {
             case PlanPolicy.FCFS -> {
-                System.out.println("First-Come, First-Served");  ///////////////////////////
+                System.out.println("First-Come, First-Served");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     cpu.simulateCycleFCFS();
-                    System.out.print("Ciclo: ");  ///////////////////////////
-                    System.out.println(i);  ///////////////////////////
+                    System.out.print("Ciclo: ");  
+                    System.out.println(i);  
                 }
             }
             case RR -> {
-                System.out.println("Round Robin");  ///////////////////////////
+                System.out.println("Round Robin");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     cpu.simulateCycleRR();
-                    System.out.print("Ciclo: ");  ///////////////////////////
-                    System.out.println(i);  ///////////////////////////
+                    System.out.print("Ciclo: ");  
+                    System.out.println(i);  
                 }
             }
             case SPN -> {
@@ -43,11 +43,11 @@ public class Simulator {
             case SRT -> {
             }
             case PRI -> {
-                System.out.println("Cola por prioridad");  ///////////////////////////
+                System.out.println("Cola por prioridad");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     cpu.simulateCyclePRI();
-                    System.out.print("Ciclo: ");  ///////////////////////////
-                    System.out.println(i);  ///////////////////////////
+                    System.out.print("Ciclo: ");  
+                    System.out.println(i);  
                 }
             }
             case MFQ -> {

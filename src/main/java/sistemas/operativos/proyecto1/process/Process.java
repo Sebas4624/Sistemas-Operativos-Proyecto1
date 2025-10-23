@@ -29,6 +29,18 @@ public class Process implements Comparable<Process> {
     public int pc()  { return pc; }
     public int mar() { return mar; }   
     
+    public void onEnqueuedReady(int cycle) { 
+    lastReadyEnqueue = cycle; 
+    }
+
+    public void onDispatchedToCpu(int cycle) {
+        if (lastReadyEnqueue != null) totalWaitCycles += (cycle - lastReadyEnqueue);
+        if (firstRunCycle == null) firstRunCycle = cycle; // para response time
+    }
+
+    public long totalWait()        { return totalWaitCycles; }
+    public Integer firstRun()      { return firstRunCycle; }
+
     /**
      * Constructor.
      * @param id Identificador del proceso.
@@ -95,6 +107,7 @@ public class Process implements Comparable<Process> {
      */
     public boolean processIOCycle() {
         if (currentState == ProcessState.BLOCKED) {
+            mar++;
             cyclesInIO++;
             if (cyclesToSatisfy > 0 && cyclesInIO >= cyclesToSatisfy) {
                 currentState = ProcessState.READY;

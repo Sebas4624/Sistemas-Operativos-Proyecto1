@@ -55,6 +55,9 @@ public class CPU {
         String id = java.time.LocalTime.now().toString();
         
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
+        
+        process.onEnqueuedReady((int) simulationTime);
+        
         if (scheduler != null) scheduler.onProcessArrived(process);
            else readyQueue.enqueue(process);
         
@@ -75,6 +78,9 @@ public class CPU {
         String id = java.time.LocalTime.now().toString();
         
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
+        
+        process.onEnqueuedReady((int) simulationTime);
+        
         if (scheduler != null) {
             scheduler.onProcessArrived(process);
         } else {
@@ -104,22 +110,23 @@ public class CPU {
             currentProcess.isBlockedIO()) {
             scheduleNextProcess();
         }
-        
-        // 3. Ejecutar proceso actual
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
             currentProcess.setRunning();
-            boolean executed = currentProcess.executeInstruction();
-            //System.out.println("Instrucción ejecutada");  ///////////////////////////
-            
+            currentProcess.executeInstruction();
+
             if (currentProcess.isBlockedIO()) {
+                currentProcess.setBlocked();               // marca BLOQUEADO
                 ioQueue.enqueue(currentProcess);
-                System.out.println("Proceso " + currentProcess.name() +  " bloqueado.");  ///////////////////////////
+                System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
                 currentProcess = null;
             } else if (currentProcess.isFinished()) {
+                currentProcess.setFinishTime((int) simulationTime);   //guarda fin
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
+            } else {
+                // ejecutó una instrucción pero sigue RUNNING
             }
-        }
+        
         
         // 4. Esperar según la duración del ciclo configurada
         try {
@@ -128,6 +135,7 @@ public class CPU {
             Thread.currentThread().interrupt();
         }
         if (scheduler != null) scheduler.onTick(simulationTime); 
+        }
     }
     
     /**
@@ -300,8 +308,14 @@ public class CPU {
             boolean done = p.processIOCycle();             // avanzo 1 ciclo de E/S
             if (done) {
                 p.setReady();
-                if (scheduler != null) scheduler.onProcessUnblocked(p);
-                else readyQueue.enqueue(p);                   // vuelve a READY
+                p.onEnqueuedReady((int) simulationTime);
+                
+                if (scheduler != null) {
+                    scheduler.onProcessUnblocked(p);
+                }
+                else {
+                    readyQueue.enqueue(p);
+                }                   // vuelve a READY
                 System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
             } else {
                 ioQueue.enqueue(p);                        // aún no termina: regresa al final
@@ -320,8 +334,12 @@ public class CPU {
         }
 
         if (currentProcess != null) {
-            currentProcess.setRunning();             
-         
+            currentProcess.setRunning();  
+            
+            currentProcess.onDispatchedToCpu((int) simulationTime);
+            if (currentProcess.startTime() == null) {
+                currentProcess.setStartTime((int) simulationTime);  // para response/turnaround
+            }
         }
     }
 
@@ -341,18 +359,5 @@ private void processIOPriorityQueue() {
         }
     }
 }
-    /**
-     * Planificar y poner en cola de prioridad el siguiente proceso que venga
-     * en cola, si hay alguno disponible.
-     */
-    private void scheduleNextPriorityProcess() {
-        if (!readyPriorityQueue.isEmpty()) {
-            try {
-                currentProcess = readyPriorityQueue.poll();
-                currentProcess.setRunning();
-            } catch (NoSuchElementException e) {
-                System.out.println("Error polling the queue: " + e);
-            }
-        }
-    }
+
 }

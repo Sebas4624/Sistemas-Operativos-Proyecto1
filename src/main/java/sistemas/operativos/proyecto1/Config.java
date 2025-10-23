@@ -5,95 +5,66 @@ package sistemas.operativos.proyecto1;
  * @author Sebastián
  */
 public class Config {
-    private int cyclesAmount;
-    private long cycleDuration;
-    private final String configFile = "system_config.json";
-    private final PlanPolicy policy;
-    private final int quantum;  // "Quantum" en forma de "ciclos"
-    private int remainingQuantum;
-    
-    /**
-     * Constructor.
-     */
+    //Parámetros de simulación 
+    private int  cyclesAmount;             // cantidad de ciclos a simular (si aplicas tope)
+    private volatile long cycleDuration;   // ms por ciclo (cambia en caliente desde GUI)
+
+    // --- Política y quantum ---
+    private PlanPolicy policy;             // debe poder cambiarse en ejecución
+    private int  quantum;                  // quantum en ciclos (RR)
+    private int  remainingQuantum;
+
+    private final String configFile = "system_config.json"; // (reservado para persistencia)
+
+    // Constructores
     public Config() {
-        this.cyclesAmount = 100;
-        this.cycleDuration = 100; // default: 100ms
-        this.policy = PlanPolicy.FCFS;
-        this.quantum = 20;
-        this.remainingQuantum = 20;
+        this(100, 100L, PlanPolicy.FCFS, 20);
     }
-    
-    /**
-     * Constructor.
-     * @param cyclesAmount Cantidad de ciclos.
-     */
+
     public Config(int cyclesAmount) {
-        this.cyclesAmount = cyclesAmount;
-        this.cycleDuration = 100; // default: 100ms
-        this.policy = PlanPolicy.FCFS;
-        this.quantum = 20;
-        this.remainingQuantum = 20;
+        this(cyclesAmount, 100L, PlanPolicy.FCFS, 20);
     }
-    
-    /**
-     * Constructor.
-     * @param cyclesAmount Cantidad de ciclos.
-     * @param initialCycleDuration Duración de cada ciclo en ms.
-     * @param policy Política de planificación [vea PlanPolicy.java].
-     * @param quantum Quantum para todos los procesos ejecutados en RR (Round Robin).
-     */
+
     public Config(int cyclesAmount, long initialCycleDuration, PlanPolicy policy, int quantum) {
-        this.cyclesAmount = cyclesAmount;
-        this.cycleDuration = initialCycleDuration;
-        this.policy = policy;
-        this.quantum = quantum;
-        this.remainingQuantum = quantum;
+        this.cyclesAmount     = Math.max(1,  cyclesAmount);
+        this.cycleDuration    = Math.max(1L, initialCycleDuration);
+        this.policy           = (policy != null) ? policy : PlanPolicy.FCFS;
+        this.quantum          = Math.max(1, quantum);
+        this.remainingQuantum = this.quantum;
     }
-    /*
-    // Guardar configuración
-    public void saveConfig() {
-        try {
-            JSONObject config = new JSONObject();
-            config.put("cycleDuration", cycleDuration);
-            
-            Files.write(Paths.get(configFile), config.toString().getBytes());
-        } catch (IOException e) {
-            System.err.println("Error guardando configuración: " + e.getMessage());
-        }
+
+    // Getters / Setters 
+    public synchronized int getCyclesAmount() { return cyclesAmount; }
+    public synchronized void setCyclesAmount(int cyclesAmount) {
+        this.cyclesAmount = Math.max(1, cyclesAmount);
     }
-    
-    // Cargar configuración
-    public void loadConfig() {
-        try {
-            String content = new String(Files.readAllBytes(Paths.get(configFile)));
-            JSONObject config = new JSONObject(content);
-            this.cycleDuration = config.getLong("cycleDuration");
-        } catch (IOException e) {
-            System.err.println("Error cargando configuración: " + e.getMessage());
-        }
-    }
-    */
-    
-    /**
-     * 
-     *   Setters & Getters
-     * 
-     */
-    
+
     public long getCycleDuration() { return cycleDuration; }
-    public void setCycleDuration(long cycleDuration) { 
-        this.cycleDuration = cycleDuration; 
+    public void setCycleDuration(long cycleDuration) {
+        this.cycleDuration = Math.max(1L, cycleDuration);
     }
-    
-    public int getCyclesAmount() { return cyclesAmount; }
-    public void getCyclesAmount(int cyclesAmount) {
-        this.cyclesAmount = cyclesAmount;
+
+    public synchronized PlanPolicy getPolicy() { return policy; }
+    public synchronized void setPolicy(PlanPolicy newPolicy) {
+        if (newPolicy != null && newPolicy != this.policy) {
+            this.policy = newPolicy;
+            // si cambias a RR, arranca rebanada nueva
+            if (newPolicy == PlanPolicy.RR) {
+                this.remainingQuantum = this.quantum;
+            }
+        }
     }
-    
-    public PlanPolicy getPolicy() { return policy; }
-    
-    public int getQuantum() { return quantum; }
-    public int getRemainingQuantum() { return remainingQuantum; }
-    public void reduceRemainingQuantum() { remainingQuantum--; }
-    public void resetRemainingQuantum() { remainingQuantum = quantum; }
+
+    public synchronized int getQuantum() { return quantum; }
+    public synchronized void setQuantum(int quantum) {
+        this.quantum = Math.max(1, quantum);
+        this.remainingQuantum = this.quantum; // reset al cambiar quantum
+    }
+
+    public synchronized int getRemainingQuantum() { return remainingQuantum; }
+    public synchronized void reduceRemainingQuantum() {
+        if (remainingQuantum > 0) remainingQuantum--;
+    }
+    public synchronized void resetRemainingQuantum() { remainingQuantum = quantum; }
 }
+

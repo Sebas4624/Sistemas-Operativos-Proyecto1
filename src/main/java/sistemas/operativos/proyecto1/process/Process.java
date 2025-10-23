@@ -60,7 +60,7 @@ public class Process implements Comparable<Process> {
             remainingInstructions--;
             
             // Verificar si genera excepción I/O (solo para procesos I/O bound)
-            if (type == ProcessType.IO_BOUND && 
+            if (type == ProcessType.IO_BOUND && cyclesForException > 0 &&
                 (instructions - remainingInstructions) % cyclesForException == 0) {
                 currentState = ProcessState.BLOCKED;
                 cyclesInIO = 0;
@@ -84,7 +84,7 @@ public class Process implements Comparable<Process> {
     public boolean processIOCycle() {
         if (currentState == ProcessState.BLOCKED) {
             cyclesInIO++;
-            if (cyclesInIO >= cyclesToSatisfy) {
+            if (cyclesToSatisfy > 0 && cyclesInIO >= cyclesToSatisfy) {
                 currentState = ProcessState.READY;
                 return true;
             }
@@ -136,7 +136,7 @@ public class Process implements Comparable<Process> {
     @Override
     public int compareTo(Process o) {
         //return Integer.compare(this.priority, o.priority());
-        return Integer.compare(o.priority(), this.priority);
+        return Integer.compare(this.priority, o.priority());
     }
 
     @Override

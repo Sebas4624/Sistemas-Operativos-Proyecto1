@@ -1,7 +1,7 @@
 package sistemas.operativos.proyecto1.process;
 
 /**
- *
+ * Clase proceso del simulador.
  * @author Sebastián
  */
 public class Process implements Comparable<Process> {
@@ -19,6 +19,17 @@ public class Process implements Comparable<Process> {
     private Integer finishTime = null;
     private Integer cyclesInIO;
 
+    /**
+     * Constructor.
+     * @param id Identificador del proceso.
+     * @param name Nombre del proceso.
+     * @param arrivalTime Tiempo de llegada del proceso.
+     * @param instructions Cantidad de instrucciones del proceso.
+     * @param type Tipo de proceso [CPU_BOUND - IO_BOUND].
+     * @param cyclesForException Ciclos necesarios para generar una excepción.
+     * @param cyclesToSatisfy Ciclos necesarios para satisfacer dicha excepción.
+     * @param priority Nivel de prioridad del proceso.
+     */
     public Process(String id, String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
         this.id = id;
         this.name = name;
@@ -31,7 +42,7 @@ public class Process implements Comparable<Process> {
         this.priority = priority;
         this.cyclesInIO = 0;
     }
-
+    
     public String id() { return id; }
     public String name() { return name; }
     public int arrival() { return arrivalTime; }
@@ -39,6 +50,11 @@ public class Process implements Comparable<Process> {
     public int remaining() { return remainingInstructions; }
     public int priority() { return priority; }
 
+    /**
+     * Ejecuta una instrucción del proceso. Se disminuye la cantidad de
+     * instrucciones restantes en uno.
+     * @return Booleano determinando si se pudo ejecutar la instrucción.
+     */
     public boolean executeInstruction() {
         if (remainingInstructions > 0 && currentState == ProcessState.RUNNING) {
             remainingInstructions--;
@@ -61,6 +77,10 @@ public class Process implements Comparable<Process> {
         return false;
     }
     
+    /**
+     * Contabiliza los ciclos para las excepciones y las satisfacciones.
+     * @return Booleano determinando si se logró satisfacer la excepción.
+     */
     public boolean processIOCycle() {
         if (currentState == ProcessState.BLOCKED) {
             cyclesInIO++;

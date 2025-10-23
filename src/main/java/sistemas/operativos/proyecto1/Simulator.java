@@ -1,6 +1,7 @@
 package sistemas.operativos.proyecto1;
 
 import sistemas.operativos.proyecto1.process.ProcessType;
+import sistemas.operativos.proyecto1.sched.Scheduler;
 
 /**
  * Clase simulador del proyecto.
@@ -27,6 +28,10 @@ public class Simulator {
         this.cpu = new CPU(config);
     }
     
+    public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
+        cpu.setScheduler(s);
+    }
+
     /**
      * Inicia la simulación, ejecutando la función de ejecución de ciclo
      * adecuada, dependiendo de la política de planificación actual.

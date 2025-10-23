@@ -19,6 +19,16 @@ public class Process implements Comparable<Process> {
     private Integer finishTime = null;
     private Integer cyclesInIO;
 
+    private int pc = 0;
+    private int mar = 0;
+    
+    private Integer firstRunCycle = null; // primer ciclo en RUNNING
+    private Integer lastReadyEnqueue = null;
+    private long totalWaitCycles = 0;
+    
+    public int pc()  { return pc; }
+    public int mar() { return mar; }   
+    
     /**
      * Constructor.
      * @param id Identificador del proceso.
@@ -57,6 +67,8 @@ public class Process implements Comparable<Process> {
      */
     public boolean executeInstruction() {
         if (remainingInstructions > 0 && currentState == ProcessState.RUNNING) {
+            pc++;
+            mar++;
             remainingInstructions--;
             
             // Verificar si genera excepción I/O (solo para procesos I/O bound)

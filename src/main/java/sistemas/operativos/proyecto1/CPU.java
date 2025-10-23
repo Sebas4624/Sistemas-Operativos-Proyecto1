@@ -6,11 +6,13 @@ import sistemas.operativos.proyecto1.lib.Queue;
 import sistemas.operativos.proyecto1.lib.PriorityQueue;
 import sistemas.operativos.proyecto1.process.Process;
 import sistemas.operativos.proyecto1.process.ProcessType;
-
+import sistemas.operativos.proyecto1.sched.Scheduler;
+import sistemas.operativos.proyecto1.sched.FCFS;
 /**
  * Clase CPU del simulador.
  * @author Sebastián
  */
+    
 public class CPU {
     private final Queue<Process> readyQueue;
     private final PriorityQueue<Process> readyPriorityQueue;
@@ -19,6 +21,11 @@ public class CPU {
     private final Config config;
     private long simulationTime;
     
+    private sistemas.operativos.proyecto1.sched.Scheduler scheduler;
+
+    public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
+        this.scheduler = s;
+    }
     /**
      * Constructor.
      * @param config Configuración del simulador. 
@@ -46,9 +53,10 @@ public class CPU {
         String id = java.time.LocalTime.now().toString();
         
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
-        readyQueue.enqueue(process);
+        if (scheduler != null) scheduler.onProcessArrived(process);
+           else readyQueue.enqueue(process);
         
-        System.out.println("Proceso creado: " + name);  ///////////////////////////
+        System.out.println("Proceso creado: " + name);  
     }
     
     /**
@@ -65,9 +73,12 @@ public class CPU {
         String id = java.time.LocalTime.now().toString();
         
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
-        readyPriorityQueue.add(process);
-        
-        System.out.println("Proceso creado: " + name);  ///////////////////////////
+        if (scheduler != null) {
+            scheduler.onProcessArrived(process);
+        } else {
+            readyPriorityQueue.add(process);
+        }
+            System.out.println("Proceso creado: " + name);  
     }
 
     /**
@@ -114,6 +125,7 @@ public class CPU {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        if (scheduler != null) scheduler.onTick(simulationTime); 
     }
     
     /**
@@ -233,7 +245,8 @@ public class CPU {
             boolean done = p.processIOCycle();             // avanzo 1 ciclo de E/S
             if (done) {
                 p.setReady();
-                readyQueue.enqueue(p);                     // vuelve a READY
+                if (scheduler != null) scheduler.onProcessUnblocked(p);
+                else readyQueue.enqueue(p);                   // vuelve a READY
                 System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
             } else {
                 ioQueue.enqueue(p);                        // aún no termina: regresa al final
@@ -242,12 +255,21 @@ public class CPU {
     }
     
 
-  private void scheduleNextProcess() {
-      if (!readyQueue.isEmpty()) {
-          currentProcess = readyQueue.dequeue();
-          currentProcess.setRunning(); // READY -> RUNNING
-      }
-  }
+    private void scheduleNextProcess() {
+        if (scheduler != null) {
+            currentProcess = scheduler.selectNext();
+        } else if (!readyQueue.isEmpty()) {
+            currentProcess = readyQueue.dequeue(); 
+        } else {
+            currentProcess = null;
+        }
+
+        if (currentProcess != null) {
+            currentProcess.setRunning();             
+         
+        }
+    }
+
     
 
 private void processIOPriorityQueue() {

@@ -5,6 +5,7 @@ import sistemas.operativos.proyecto1.sched.FCFS;
 import sistemas.operativos.proyecto1.sched.RR;
 import sistemas.operativos.proyecto1.sched.PRI;
 import sistemas.operativos.proyecto1.sched.SJF;
+import sistemas.operativos.proyecto1.sched.HRRN;
 
 /**
  * Archivo "Main" del proyecto.
@@ -25,6 +26,7 @@ public class Proyecto1 {
        // sim.setScheduler(new RR(config));   
        // sim.setScheduler(new PRI());
         sim.setScheduler(new SJF());
+       // sim.setScheduler(new HRRN());
 
         // Crear procesos de ejemplo
         // CPU Bound: 20 instrucciones, sin I/O

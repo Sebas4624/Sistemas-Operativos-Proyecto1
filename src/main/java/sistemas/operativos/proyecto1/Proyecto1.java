@@ -3,7 +3,7 @@ package sistemas.operativos.proyecto1;
 import sistemas.operativos.proyecto1.process.ProcessType;
 
 /**
- *
+ * Archivo "Main" del proyecto.
  * @author Sebastián
  * @author Nicole
  */

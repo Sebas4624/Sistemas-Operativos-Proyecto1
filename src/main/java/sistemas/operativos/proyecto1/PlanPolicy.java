@@ -1,7 +1,7 @@
 package sistemas.operativos.proyecto1;
 
 /**
- *
+ * Políticas de planificación.
  * @author Sebastián
  */
 public enum PlanPolicy {

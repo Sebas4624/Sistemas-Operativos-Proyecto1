@@ -1,7 +1,7 @@
 package sistemas.operativos.proyecto1;
 
 /**
- *
+ * Clase configuración para el simulador.
  * @author Sebastián
  */
 public class Config {
@@ -12,6 +12,9 @@ public class Config {
     private final int quantum;  // "Quantum" en forma de "ciclos"
     private int remainingQuantum;
     
+    /**
+     * Constructor.
+     */
     public Config() {
         this.cyclesAmount = 100;
         this.cycleDuration = 100; // default: 100ms
@@ -20,6 +23,10 @@ public class Config {
         this.remainingQuantum = 20;
     }
     
+    /**
+     * Constructor.
+     * @param cyclesAmount Cantidad de ciclos.
+     */
     public Config(int cyclesAmount) {
         this.cyclesAmount = cyclesAmount;
         this.cycleDuration = 100; // default: 100ms
@@ -28,6 +35,13 @@ public class Config {
         this.remainingQuantum = 20;
     }
     
+    /**
+     * Constructor.
+     * @param cyclesAmount Cantidad de ciclos.
+     * @param initialCycleDuration Duración de cada ciclo en ms.
+     * @param policy Política de planificación [vea PlanPolicy.java].
+     * @param quantum Quantum para todos los procesos ejecutados en RR (Round Robin).
+     */
     public Config(int cyclesAmount, long initialCycleDuration, PlanPolicy policy, int quantum) {
         this.cyclesAmount = cyclesAmount;
         this.cycleDuration = initialCycleDuration;
@@ -59,7 +73,13 @@ public class Config {
         }
     }
     */
-    // Getters y Setters
+    
+    /**
+     * 
+     *   Setters & Getters
+     * 
+     */
+    
     public long getCycleDuration() { return cycleDuration; }
     public void setCycleDuration(long cycleDuration) { 
         this.cycleDuration = cycleDuration; 

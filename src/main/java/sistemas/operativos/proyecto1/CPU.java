@@ -22,8 +22,11 @@ public class CPU {
     private Process currentProcess;
     private final Config config;
     private long simulationTime;
-    
+    private long busyCycles = 0;    
     private sistemas.operativos.proyecto1.sched.Scheduler scheduler;
+    
+    public long getBusyCycles() { return busyCycles; }
+
 
     public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
         this.scheduler = s;
@@ -106,13 +109,14 @@ public class CPU {
         //if (currentProcess != null) System.out.println(currentProcess.toString());  ///////////////////////////
         
         // 2. Planificar siguiente proceso (si no hay uno actual)
-        if (currentProcess == null || currentProcess.isFinished() || 
-            currentProcess.isBlockedIO()) {
+        if (currentProcess == null || currentProcess.isFinished() || currentProcess.isBlockedIO()) {
             scheduleNextProcess();
         }
+        
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
             currentProcess.setRunning();
-            currentProcess.executeInstruction();
+            boolean executed = currentProcess.executeInstruction();
+            if (executed) busyCycles++; 
 
             if (currentProcess.isBlockedIO()) {
                 currentProcess.setBlocked();               // marca BLOQUEADO
@@ -160,11 +164,13 @@ public class CPU {
         // 3) Ejecuta un ciclo del proceso actual (si lo hay)
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
             currentProcess.setRunning();
-            currentProcess.executeInstruction();   // 1 instrucción por ciclo
+            boolean executed = currentProcess.executeInstruction();
+            if (executed) busyCycles++;    
             config.reduceRemainingQuantum();
 
             // *** PRIORIDAD 1: terminó ***
             if (currentProcess.isFinished()) {
+                currentProcess.setFinishTime((int) simulationTime); //
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;  // el próximo ciclo selecciona otro y resetea quantum
             }
@@ -177,14 +183,17 @@ public class CPU {
             }
             // *** PRIORIDAD 3: venció el quantum (RR) ***
             else if (config.getRemainingQuantum() == 0) {
+                // métrica: va a READY
+                currentProcess.onEnqueuedReady((int) simulationTime);
+
                 if (scheduler != null) {
-                    scheduler.onProcessPreempted(currentProcess);  // ★ reencola vía scheduler
+                    scheduler.onProcessPreempted(currentProcess);
                 } else {
                     currentProcess.setReady();
-                    readyQueue.enqueue(currentProcess);            // fallback sin scheduler
+                    readyQueue.enqueue(currentProcess);
                 }
                 System.out.println("Quantum de " + currentProcess.name() + " terminado. Reencolado en READY.");
-                currentProcess = null; // el próximo selectNext() hará reset del quantum    
+                currentProcess = null; // el próximo selectNext() hará reset del quantum
             }
         }
 
@@ -222,7 +231,8 @@ public class CPU {
         // 3. Ejecutar proceso actual
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
             currentProcess.setRunning();
-            currentProcess.executeInstruction();
+            boolean executed = currentProcess.executeInstruction();
+            if (executed) busyCycles++;
             //System.out.println("Instrucción ejecutada");  ///////////////////////////
             
             if (currentProcess.isBlockedIO()) {
@@ -231,6 +241,7 @@ public class CPU {
                 System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
                 currentProcess = null;
             } else if (currentProcess.isFinished()) {
+                currentProcess.setFinishTime((int) simulationTime);
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
             }
@@ -271,7 +282,8 @@ public class CPU {
         // 3) Ejecutar 1 instrucción
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
             currentProcess.setRunning();
-            currentProcess.executeInstruction();
+            boolean executed = currentProcess.executeInstruction();
+            if (executed) busyCycles++;
 
             if (currentProcess.isBlockedIO()) {
                 currentProcess.setBlocked();           // estado coherente
@@ -279,6 +291,7 @@ public class CPU {
                 System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
                 currentProcess = null;
             } else if (currentProcess.isFinished()) {
+                currentProcess.setFinishTime((int) simulationTime);
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
             }
@@ -343,21 +356,20 @@ public class CPU {
         }
     }
 
-    
-
-private void processIOPriorityQueue() {
-    int n = ioQueue.size();
-    for (int i = 0; i < n; i++) {
-        Process p = ioQueue.dequeue();          // saco cabeza
-        boolean done = p.processIOCycle();      // avanzo 1 ciclo de E/S
-        if (done) {
-            p.setReady();
-            readyPriorityQueue.add(p);          // vuelve a READY (con prioridad)
-            System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
-        } else {
-            ioQueue.enqueue(p);                 // aún no termina: regresa al final
+   
+    private void processIOPriorityQueue() {
+        int n = ioQueue.size();
+        for (int i = 0; i < n; i++) {
+            Process p = ioQueue.dequeue();          // saco cabeza
+            boolean done = p.processIOCycle();      // avanzo 1 ciclo de E/S
+            if (done) {
+                p.setReady();
+                readyPriorityQueue.add(p);          // vuelve a READY (con prioridad)
+                System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
+            } else {
+                ioQueue.enqueue(p);                 // aún no termina: regresa al final
+            }
         }
     }
-}
 
 }

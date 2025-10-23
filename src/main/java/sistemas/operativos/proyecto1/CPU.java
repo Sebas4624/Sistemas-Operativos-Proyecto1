@@ -8,7 +8,7 @@ import sistemas.operativos.proyecto1.process.Process;
 import sistemas.operativos.proyecto1.process.ProcessType;
 
 /**
- *
+ * Clase CPU del simulador.
  * @author Sebastián
  */
 public class CPU {
@@ -19,6 +19,10 @@ public class CPU {
     private final Config config;
     private long simulationTime;
     
+    /**
+     * Constructor.
+     * @param config Configuración del simulador. 
+     */
     public CPU(Config config) {
         this.readyQueue = new Queue();
         this.readyPriorityQueue = new PriorityQueue();
@@ -27,7 +31,17 @@ public class CPU {
         this.simulationTime = 0;
     }
     
-    // Método para crear procesos
+    
+    /**
+     * Crea un proceso y lo pone en la cola de listos.
+     * @param name Nombre del proceso.
+     * @param arrivalTime Tiempo de llegada del proceso.
+     * @param instructions Cantidad de instrucciones del proceso.
+     * @param type Tipo de proceso [CPU_BOUND - IO_BOUND].
+     * @param cyclesForException Ciclos necesarios para generar una excepción.
+     * @param cyclesToSatisfy Ciclos necesarios para satisfacer dicha excepción.
+     * @param priority Nivel de prioridad del proceso.
+     */
     public void createProcess(String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
         String id = java.time.LocalTime.now().toString();
         
@@ -37,7 +51,16 @@ public class CPU {
         System.out.println("Proceso creado: " + name);  ///////////////////////////
     }
     
-    // Método para crear procesos con prioridad
+    /**
+     * Crea un proceso y lo pone en la cola de prioridad de listos.
+     * @param name Nombre del proceso.
+     * @param arrivalTime Tiempo de llegada del proceso.
+     * @param instructions Cantidad de instrucciones del proceso.
+     * @param type Tipo de proceso [CPU_BOUND - IO_BOUND].
+     * @param cyclesForException Ciclos necesarios para generar una excepción.
+     * @param cyclesToSatisfy Ciclos necesarios para satisfacer dicha excepción.
+     * @param priority Nivel de prioridad del proceso.
+     */
     public void createPriorityProcess(String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
         String id = java.time.LocalTime.now().toString();
         
@@ -46,13 +69,12 @@ public class CPU {
         
         System.out.println("Proceso creado: " + name);  ///////////////////////////
     }
-    
+
     /**
-     *
-     *   Política de Planificación FCFS (First-Come First-Served)
-     *
+     * Política de planificación FCFS (First-Come First-Served)
+     * 
+     * Se ejecutan los procesos tal cual como se van añadiendo a la cola de listos.
      */
-    
     public void simulateCycleFCFS() {
         simulationTime++;
         
@@ -95,11 +117,13 @@ public class CPU {
     }
     
     /**
-     *
-     *   Política de Planificación RR (Round Robin)
-     *
+     * Política de planificación RR (Round Robin)
+     * 
+     * Se ejecutan los procesos con un valor "Quantum" asignado a cada uno de
+     * los procesos de forma equitativa, y por cada ciclo se va disminuyendo en
+     * uno. Si el "Quantum" del proceso llega a 0, se expulsa del CPU y se añade
+     * al final de la cola de listos.
      */
-    
     public void simulateCycleRR() {
         simulationTime++;
 
@@ -149,11 +173,13 @@ public class CPU {
 
     
     /**
-     *
-     *   Política de Planificación PRI (Por prioridades; mayor número, mayor prioridad)
-     *
+     * Política de planificación PRI (Por prioridades; mayor número, mayor prioridad)
+     * 
+     * Se ejecutan los procesos que se van sacando de la cola de prioridad de
+     * listos. Conforme se van sacando procesos de la cola, van saliendo los
+     * que mayor nivel de prioridad tienen, y van quedando los que menor
+     * prioridad tienen.
      */
-    
     public void simulateCyclePRI() {
         simulationTime++;
         
@@ -196,6 +222,10 @@ public class CPU {
      *
      */
     
+    /**
+     * Procesar la cola de IO, si no está vacía. Si se completa una petición de
+     * IO, se desbloquea el proceso y se añade de vuelta a la cola de listos.
+     */
     private void processIOQueue() {
         int n = ioQueue.size();
         for (int i = 0; i < n; i++) {
@@ -212,29 +242,32 @@ public class CPU {
     }
     
 
-    private void scheduleNextProcess() {
-        if (!readyQueue.isEmpty()) {
-            currentProcess = readyQueue.dequeue();
-            currentProcess.setRunning(); // estado explícito: READY -> RUNNING
+  private void scheduleNextProcess() {
+      if (!readyQueue.isEmpty()) {
+          currentProcess = readyQueue.dequeue();
+          currentProcess.setRunning(); // READY -> RUNNING
+      }
+  }
+    
+
+private void processIOPriorityQueue() {
+    int n = ioQueue.size();
+    for (int i = 0; i < n; i++) {
+        Process p = ioQueue.dequeue();          // saco cabeza
+        boolean done = p.processIOCycle();      // avanzo 1 ciclo de E/S
+        if (done) {
+            p.setReady();
+            readyPriorityQueue.add(p);          // vuelve a READY (con prioridad)
+            System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
+        } else {
+            ioQueue.enqueue(p);                 // aún no termina: regresa al final
         }
     }
-    
-    
-    private void processIOPriorityQueue() {
-        int n = ioQueue.size();
-        for (int i = 0; i < n; i++) {
-            Process p = ioQueue.dequeue();          // saco cabeza
-            boolean done = p.processIOCycle();      // avanzo 1 ciclo de E/S
-            if (done) {
-                p.setReady();
-                readyPriorityQueue.add(p);          // vuelve a READY (con prioridad)
-                System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
-            } else {
-                ioQueue.enqueue(p);                 // aún no termina: regresa al final
-            }
-        }
-    }
-    
+}
+    /**
+     * Planificar y poner en cola de prioridad el siguiente proceso que venga
+     * en cola, si hay alguno disponible.
+     */
     private void scheduleNextPriorityProcess() {
         if (!readyPriorityQueue.isEmpty()) {
             try {

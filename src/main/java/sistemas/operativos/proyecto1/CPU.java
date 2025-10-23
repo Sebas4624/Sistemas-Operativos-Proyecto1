@@ -190,36 +190,39 @@ public class CPU {
      */
     
     private void processIOQueue() {
-        Iterator<Process> iterator = ioQueue.iterator();
-        while (iterator.hasNext()) {
-            Process process = iterator.next();
-            boolean ioCompleted = process.processIOCycle();
-            
-            if (ioCompleted) {
-                // iterator.remove();
-                ioQueue.dequeue();
-                readyQueue.enqueue(process);
-                System.out.println("I/O completado para: " + process.name() + ". Poniendo en cola de listos.");
+        int n = ioQueue.size();
+        for (int i = 0; i < n; i++) {
+            Process p = ioQueue.dequeue();                 // saco la cabeza
+            boolean done = p.processIOCycle();             // avanzo 1 ciclo de E/S
+            if (done) {
+                p.setReady();
+                readyQueue.enqueue(p);                     // vuelve a READY
+                System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
+            } else {
+                ioQueue.enqueue(p);                        // aún no termina: regresa al final
             }
         }
     }
     
+
     private void scheduleNextProcess() {
         if (!readyQueue.isEmpty()) {
             currentProcess = readyQueue.dequeue();
         }
     }
     
+    
     private void processIOPriorityQueue() {
-        Iterator<Process> iterator = ioQueue.iterator();
-        while (iterator.hasNext()) {
-            Process process = iterator.next();
-            boolean ioCompleted = process.processIOCycle();
-            
-            if (ioCompleted) {
-                ioQueue.dequeue();
-                readyPriorityQueue.add(process);
-                System.out.println("I/O completado para: " + process.name() + ". Poniendo en cola de listos.");
+        int n = ioQueue.size();
+        for (int i = 0; i < n; i++) {
+            Process p = ioQueue.dequeue();
+            boolean done = p.processIOCycle();
+            if (done) {
+                p.setReady();
+                readyPriorityQueue.add(p);                 // vuelve a READY con prioridad
+                System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
+            } else {
+                ioQueue.enqueue(p);
             }
         }
     }

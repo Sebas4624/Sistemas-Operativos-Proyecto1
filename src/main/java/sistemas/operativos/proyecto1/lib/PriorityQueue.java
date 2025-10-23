@@ -19,7 +19,7 @@ public class PriorityQueue<T extends Comparable<? super T>> {
         if (list.isEmpty()) throw new NoSuchElementException("PriorityQueue is empty");
         T best = null;
         for (T v : list) {
-            if (best == null || v.compareTo(best) < 0) best = v;
+            if (best == null || v.compareTo(best) > 0) best = v;
         }
         return best;
     }
@@ -28,7 +28,7 @@ public class PriorityQueue<T extends Comparable<? super T>> {
         if (list.isEmpty()) throw new NoSuchElementException("PriorityQueue is empty");
         T best = null;
         for (T v : list) {
-            if (best == null || v.compareTo(best) < 0) best = v;
+            if (best == null || v.compareTo(best) > 0) best = v;
         }
         // remove first occurrence of best and return it
         boolean removed = list.remove(best);

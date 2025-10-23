@@ -5,7 +5,7 @@ package sistemas.operativos.proyecto1.lib;
  * @author Sebastián
  * @param <T>
  */
-public class Queue<T> {
+public class Queue<T> implements Iterable<T> {
     private final LinkedList<T> list = new LinkedList<>();
 
     public Queue() { }

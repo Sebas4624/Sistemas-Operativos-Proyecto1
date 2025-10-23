@@ -206,18 +206,19 @@ public class CPU {
         // 2. Planificar siguiente proceso (si no hay uno actual)
         if (currentProcess == null || currentProcess.isFinished() || 
             currentProcess.isBlockedIO()) {
-            scheduleNextPriorityProcess();
+            scheduleNextProcess();
         }
         
         // 3. Ejecutar proceso actual
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
             currentProcess.setRunning();
-            boolean executed = currentProcess.executeInstruction();
+            currentProcess.executeInstruction();
             //System.out.println("Instrucción ejecutada");  ///////////////////////////
             
             if (currentProcess.isBlockedIO()) {
+                currentProcess.setBlocked();    // marca estado
                 ioQueue.enqueue(currentProcess);
-                System.out.println("Proceso " + currentProcess.name() +  " bloqueado.");  ///////////////////////////
+                System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
                 currentProcess = null;
             } else if (currentProcess.isFinished()) {
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
@@ -231,6 +232,7 @@ public class CPU {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        if (scheduler != null) scheduler.onTick(simulationTime);
     }
     
     /**

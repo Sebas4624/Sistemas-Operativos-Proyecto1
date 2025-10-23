@@ -54,10 +54,13 @@ public class Simulator {
                     System.out.println(i);  
                 }
             }
-            case SPN -> {
+            case SRTF -> {
+                System.out.println("Shortest Remaining Time First");
+                for (int i = 1; i <= config.getCyclesAmount(); i++) {
+                    cpu.simulateCycleSRTF();
+                }
             }
-            case SRT -> {
-            }
+
             case PRI -> {
                 System.out.println("Cola por prioridad");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {

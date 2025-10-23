@@ -8,6 +8,8 @@ import sistemas.operativos.proyecto1.process.Process;
 import sistemas.operativos.proyecto1.process.ProcessType;
 import sistemas.operativos.proyecto1.sched.Scheduler;
 import sistemas.operativos.proyecto1.sched.FCFS;
+import sistemas.operativos.proyecto1.sched.SRTF;
+
 /**
  * Clase CPU del simulador.
  * @author Sebastián
@@ -201,7 +203,7 @@ public class CPU {
         simulationTime++;
         
         // 1. Procesar I/O
-        processIOPriorityQueue();
+        processIOQueue(); 
         
         // 2. Planificar siguiente proceso (si no hay uno actual)
         if (currentProcess == null || currentProcess.isFinished() || 
@@ -232,6 +234,52 @@ public class CPU {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        if (scheduler != null) scheduler.onTick(simulationTime);
+    }
+    
+        /** SRTF: Shortest Remaining Time First (EXPROPIATIVO). */
+    public void simulateCycleSRTF() {
+        simulationTime++;
+
+        // 1) Avanza la E/S (esto reinyecta a READY vía scheduler.onProcessUnblocked(...))
+        processIOQueue();
+
+        // 1.5) Hook de EXPROPIACIÓN SRTF:
+        // si hay un READY con menor remaining() que el RUNNING, desalojar.
+        if (scheduler != null && currentProcess != null && scheduler instanceof SRTF) {
+            SRTF srtf = (SRTF) scheduler;
+            Process best = srtf.peekBest();                  // mira el mejor sin sacarlo
+            if (best != null && best.remaining() < currentProcess.remaining()) {
+                scheduler.onProcessPreempted(currentProcess); // reencola el actual a READY
+                currentProcess = null;                        // forzar nueva selección
+            }
+        }
+
+        // 2) Seleccionar si no hay actual / terminó / se bloqueó / (o lo acabamos de desalojar)
+        if (currentProcess == null || currentProcess.isFinished() || currentProcess.isBlockedIO()) {
+            scheduleNextProcess();   // este ya hace setRunning() al elegido
+        }
+
+        // 3) Ejecutar 1 instrucción
+        if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
+            currentProcess.setRunning();
+            currentProcess.executeInstruction();
+
+            if (currentProcess.isBlockedIO()) {
+                currentProcess.setBlocked();           // estado coherente
+                ioQueue.enqueue(currentProcess);       // pasa a cola de E/S
+                System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
+                currentProcess = null;
+            } else if (currentProcess.isFinished()) {
+                System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
+                currentProcess = null;
+            }
+        }
+
+        // 4) Espera + tick
+        try { Thread.sleep(config.getCycleDuration()); }
+        catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+
         if (scheduler != null) scheduler.onTick(simulationTime);
     }
     

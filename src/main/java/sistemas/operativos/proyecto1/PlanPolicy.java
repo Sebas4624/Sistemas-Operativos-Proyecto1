@@ -10,5 +10,6 @@ public enum PlanPolicy {
     SPN, // Shortest Process Next
     SRT, // Shortest Remaining Time
     PRI, // Priority
-    MFQ // Multilevel Feedback Queue
+    MFQ, // Multilevel Feedback Queue
+    SRTF
 }

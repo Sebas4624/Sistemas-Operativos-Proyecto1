@@ -126,44 +126,51 @@ public class CPU {
      */
     public void simulateCycleRR() {
         simulationTime++;
-        
-        // 1. Procesar I/O
+
+        // 1) Avanza E/S
         processIOQueue();
-        
-        // 2. Planificar siguiente proceso (si no hay uno actual)
-        if (currentProcess == null || currentProcess.isFinished() || 
-            currentProcess.isBlockedIO()) {
-            scheduleNextProcess();
+
+        // 2) Selecciona si no hay proceso ejecutando (o si terminó / se bloqueó)
+        if (currentProcess == null || currentProcess.isFinished() || currentProcess.isBlockedIO()) {
+            scheduleNextProcess();            // pone RUNNING internamente
+            config.resetRemainingQuantum();   // nuevo slice => quantum completo
         }
-        
-        // 3. Ejecutar proceso actual
+
+        // 3) Ejecuta un ciclo del proceso actual (si lo hay)
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
             currentProcess.setRunning();
-            boolean executed = currentProcess.executeInstruction();
+            currentProcess.executeInstruction();   // 1 instrucción por ciclo
             config.reduceRemainingQuantum();
-            
-            if (config.getRemainingQuantum() == 0) {
-                readyQueue.enqueue(currentProcess);
-                config.resetRemainingQuantum();
-                System.out.println("Quantum del proceso " + currentProcess.name() + " terminado. Volviendo a poner en cola de listos.");  ///////////////////////////
-                currentProcess = null;
-            } else if (currentProcess.isBlockedIO()) {
-                ioQueue.enqueue(currentProcess);
-                System.out.println("Proceso " + currentProcess.name() +  " bloqueado.");  ///////////////////////////
-                currentProcess = null;
-            } else if (currentProcess.isFinished()) {
+
+            // *** PRIORIDAD 1: terminó ***
+            if (currentProcess.isFinished()) {
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
-                currentProcess = null;
+                currentProcess = null;  // el próximo ciclo selecciona otro y resetea quantum
+            }
+            // *** PRIORIDAD 2: se bloqueó por E/S ***
+            else if (currentProcess.isBlockedIO()) {
+                currentProcess.setBlocked();
+                ioQueue.enqueue(currentProcess);
+                System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
+                currentProcess = null;  // el próximo ciclo selecciona otro y resetea quantum
+            }
+            // *** PRIORIDAD 3: venció el quantum (RR) ***
+            else if (config.getRemainingQuantum() == 0) {
+                currentProcess.setReady();           // volver a READY es clave
+                readyQueue.enqueue(currentProcess);  // al final de la cola
+                System.out.println("Quantum de " + currentProcess.name() + " terminado. Reencolado en READY.");
+                currentProcess = null;               // al seleccionar otro se hace reset del quantum
             }
         }
-        
-        // 4. Esperar según la duración del ciclo configurada
+
+        // 4) Espera según duración del ciclo
         try {
             Thread.sleep(config.getCycleDuration());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
+
     
     /**
      * Política de planificación PRI (Por prioridades; mayor número, mayor prioridad)
@@ -265,8 +272,9 @@ private void processIOPriorityQueue() {
         if (!readyPriorityQueue.isEmpty()) {
             try {
                 currentProcess = readyPriorityQueue.poll();
+                currentProcess.setRunning();
             } catch (NoSuchElementException e) {
-                System.out.println("Error polling the queue: " + e.toString());
+                System.out.println("Error polling the queue: " + e);
             }
         }
     }

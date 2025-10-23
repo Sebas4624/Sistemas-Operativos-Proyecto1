@@ -3,6 +3,8 @@ package sistemas.operativos.proyecto1;
 import sistemas.operativos.proyecto1.process.ProcessType;
 import sistemas.operativos.proyecto1.sched.FCFS;
 import sistemas.operativos.proyecto1.sched.RR;
+import sistemas.operativos.proyecto1.sched.PRI;
+import sistemas.operativos.proyecto1.sched.SJF;
 
 /**
  * Archivo "Main" del proyecto.
@@ -12,14 +14,17 @@ import sistemas.operativos.proyecto1.sched.RR;
 public class Proyecto1 {
 
     public static void main(String[] args) {
-        //Config config = new Config(200, 100, PlanPolicy.FCFS, 20);
-        Config config = new Config(200, 100, PlanPolicy.RR, 20);
+        Config config = new Config(200, 100, PlanPolicy.FCFS, 20);
+        //Config config = new Config(200, 100, PlanPolicy.RR, 20);
         //Config config = new Config(200, 100, PlanPolicy.PRI, 20);
+        
        
         Simulator sim = new Simulator(config);
 
-        sim.setScheduler(new FCFS());   
-        sim.setScheduler(new RR(config));                         // ← usar RR
+        //sim.setScheduler(new FCFS());   
+       // sim.setScheduler(new RR(config));   
+       // sim.setScheduler(new PRI());
+        sim.setScheduler(new SJF());
 
         // Crear procesos de ejemplo
         // CPU Bound: 20 instrucciones, sin I/O

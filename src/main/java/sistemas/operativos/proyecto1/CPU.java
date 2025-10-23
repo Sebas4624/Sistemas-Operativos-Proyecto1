@@ -208,6 +208,7 @@ public class CPU {
     private void scheduleNextProcess() {
         if (!readyQueue.isEmpty()) {
             currentProcess = readyQueue.dequeue();
+            currentProcess.setRunning(); // estado explícito: READY -> RUNNING
         }
     }
     
@@ -215,14 +216,14 @@ public class CPU {
     private void processIOPriorityQueue() {
         int n = ioQueue.size();
         for (int i = 0; i < n; i++) {
-            Process p = ioQueue.dequeue();
-            boolean done = p.processIOCycle();
+            Process p = ioQueue.dequeue();          // saco cabeza
+            boolean done = p.processIOCycle();      // avanzo 1 ciclo de E/S
             if (done) {
                 p.setReady();
-                readyPriorityQueue.add(p);                 // vuelve a READY con prioridad
+                readyPriorityQueue.add(p);          // vuelve a READY (con prioridad)
                 System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
             } else {
-                ioQueue.enqueue(p);
+                ioQueue.enqueue(p);                 // aún no termina: regresa al final
             }
         }
     }

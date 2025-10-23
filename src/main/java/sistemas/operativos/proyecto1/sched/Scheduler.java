@@ -4,10 +4,16 @@
  */
 package sistemas.operativos.proyecto1.sched;
 
-/**
- *
- * @author nicolepinto
- */
-public class Scheduler {
-    
+
+
+public interface Scheduler {
+    String name();
+    void onProcessArrived(sistemas.operativos.proyecto1.process.Process p);
+    void onProcessUnblocked(sistemas.operativos.proyecto1.process.Process p);
+    void onProcessPreempted(sistemas.operativos.proyecto1.process.Process running);
+    sistemas.operativos.proyecto1.process.Process selectNext();
+    void onTick(long cycle);
 }
+
+
+

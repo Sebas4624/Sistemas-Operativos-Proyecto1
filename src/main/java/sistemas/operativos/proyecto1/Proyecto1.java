@@ -1,7 +1,7 @@
 package sistemas.operativos.proyecto1;
 
 import sistemas.operativos.proyecto1.process.ProcessType;
-
+import sistemas.operativos.proyecto1.sched.FCFS;
 /**
  * Archivo "Main" del proyecto.
  * @author Sebastián
@@ -10,11 +10,12 @@ import sistemas.operativos.proyecto1.process.ProcessType;
 public class Proyecto1 {
 
     public static void main(String[] args) {
-        //Config config = new Config(200, 100, PlanPolicy.FCFS, 20);
+        Config config = new Config(200, 100, PlanPolicy.FCFS, 20);
         //Config config = new Config(200, 100, PlanPolicy.RR, 20);
-        Config config = new Config(200, 100, PlanPolicy.PRI, 20);
+        //Config config = new Config(200, 100, PlanPolicy.PRI, 20);
         Simulator sim = new Simulator(config);
-        
+
+        sim.setScheduler(new FCFS());        
         // Crear procesos de ejemplo
         // CPU Bound: 20 instrucciones, sin I/O
         sim.createProcess("Proceso_CPU_1", 0, 20, ProcessType.CPU_BOUND, 0, 0, 1);
@@ -30,7 +31,7 @@ public class Proyecto1 {
         
         // I/O Bound: 20 instrucciones, I/O cada 5 ciclos, servicio de 5 ciclos
         sim.createProcess("Proceso_IO_2", 0, 30, ProcessType.IO_BOUND, 5, 5, 2);
-        
+                
         // Start Simulation
         sim.startSimulation();
     }

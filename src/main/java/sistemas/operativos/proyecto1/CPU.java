@@ -220,49 +220,43 @@ public class CPU {
      * IO, se desbloquea el proceso y se añade de vuelta a la cola de listos.
      */
     private void processIOQueue() {
-        Iterator<Process> iterator = ioQueue.iterator();
-        while (iterator.hasNext()) {
-            Process process = iterator.next();
-            boolean ioCompleted = process.processIOCycle();
-            
-            if (ioCompleted) {
-                // iterator.remove();
-                ioQueue.dequeue();
-                readyQueue.enqueue(process);
-                System.out.println("I/O completado para: " + process.name() + ". Poniendo en cola de listos.");
+        int n = ioQueue.size();
+        for (int i = 0; i < n; i++) {
+            Process p = ioQueue.dequeue();                 // saco la cabeza
+            boolean done = p.processIOCycle();             // avanzo 1 ciclo de E/S
+            if (done) {
+                p.setReady();
+                readyQueue.enqueue(p);                     // vuelve a READY
+                System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
+            } else {
+                ioQueue.enqueue(p);                        // aún no termina: regresa al final
             }
         }
     }
     
-    /**
-     * Planificar y poner en cola el siguiente proceso que venga en cola,
-     * si hay alguno disponible.
-     */
-    private void scheduleNextProcess() {
-        if (!readyQueue.isEmpty()) {
-            currentProcess = readyQueue.dequeue();
+
+  private void scheduleNextProcess() {
+      if (!readyQueue.isEmpty()) {
+          currentProcess = readyQueue.dequeue();
+          currentProcess.setRunning(); // READY -> RUNNING
+      }
+  }
+    
+
+private void processIOPriorityQueue() {
+    int n = ioQueue.size();
+    for (int i = 0; i < n; i++) {
+        Process p = ioQueue.dequeue();          // saco cabeza
+        boolean done = p.processIOCycle();      // avanzo 1 ciclo de E/S
+        if (done) {
+            p.setReady();
+            readyPriorityQueue.add(p);          // vuelve a READY (con prioridad)
+            System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
+        } else {
+            ioQueue.enqueue(p);                 // aún no termina: regresa al final
         }
     }
-    
-    /**
-     * Procesar la cola de IO, si no está vacía. Si se completa una petición de
-     * IO, se desbloquea el proceso y se añade de vuelta a la cola de
-     * prioridad de listos.
-     */
-    private void processIOPriorityQueue() {
-        Iterator<Process> iterator = ioQueue.iterator();
-        while (iterator.hasNext()) {
-            Process process = iterator.next();
-            boolean ioCompleted = process.processIOCycle();
-            
-            if (ioCompleted) {
-                ioQueue.dequeue();
-                readyPriorityQueue.add(process);
-                System.out.println("I/O completado para: " + process.name() + ". Poniendo en cola de listos.");
-            }
-        }
-    }
-    
+}
     /**
      * Planificar y poner en cola de prioridad el siguiente proceso que venga
      * en cola, si hay alguno disponible.

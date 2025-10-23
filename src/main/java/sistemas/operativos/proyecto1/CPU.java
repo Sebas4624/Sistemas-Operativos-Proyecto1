@@ -9,6 +9,7 @@ import sistemas.operativos.proyecto1.process.ProcessType;
 import sistemas.operativos.proyecto1.sched.Scheduler;
 import sistemas.operativos.proyecto1.sched.FCFS;
 import sistemas.operativos.proyecto1.sched.SRTF;
+import java.util.concurrent.Semaphore;
 
 /**
  * Clase CPU del simulador.
@@ -24,6 +25,13 @@ public class CPU {
     private long simulationTime;
     private long busyCycles = 0;    
     private sistemas.operativos.proyecto1.sched.Scheduler scheduler;
+    private final Semaphore readyMutex = new Semaphore(1, true);
+    private final Semaphore ioMutex    = new Semaphore(1, true);
+    private final Semaphore cpuMutex   = new Semaphore(1, true);
+    
+    // Si true, la E/S la hará un hilo externo (no se llama processIOQueue() desde CPU):
+    private volatile boolean externalIOThread = false;
+    public void enableExternalIOThread(boolean v) { this.externalIOThread = v; }
     
     public long getBusyCycles() { return busyCycles; }
 
@@ -61,9 +69,14 @@ public class CPU {
         
         process.onEnqueuedReady((int) simulationTime);
         
-        if (scheduler != null) scheduler.onProcessArrived(process);
-           else readyQueue.enqueue(process);
-        
+        readyMutex.acquireUninterruptibly();
+
+        try {
+            if (scheduler != null) scheduler.onProcessArrived(process);
+            else readyQueue.enqueue(process);
+        } finally {
+            readyMutex.release();
+        }
         System.out.println("Proceso creado: " + name);  
     }
     
@@ -84,12 +97,14 @@ public class CPU {
         
         process.onEnqueuedReady((int) simulationTime);
         
-        if (scheduler != null) {
-            scheduler.onProcessArrived(process);
-        } else {
-            readyPriorityQueue.add(process);
+        readyMutex.acquireUninterruptibly();
+        try {
+            if (scheduler != null) scheduler.onProcessArrived(process);
+            else readyPriorityQueue.add(process); // fallback legacy
+        } finally {
+            readyMutex.release();
         }
-            System.out.println("Proceso creado: " + name);  
+        System.out.println("Proceso creado: " + name);
     }
 
     /**

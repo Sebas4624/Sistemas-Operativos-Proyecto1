@@ -145,7 +145,6 @@ public class CPU {
         // 2) Selecciona si no hay proceso ejecutando (o si terminó / se bloqueó)
         if (currentProcess == null || currentProcess.isFinished() || currentProcess.isBlockedIO()) {
             scheduleNextProcess();            // pone RUNNING internamente
-            config.resetRemainingQuantum();   // nuevo slice => quantum completo
         }
 
         // 3) Ejecuta un ciclo del proceso actual (si lo hay)
@@ -168,10 +167,14 @@ public class CPU {
             }
             // *** PRIORIDAD 3: venció el quantum (RR) ***
             else if (config.getRemainingQuantum() == 0) {
-                currentProcess.setReady();           // volver a READY es clave
-                readyQueue.enqueue(currentProcess);  // al final de la cola
+                if (scheduler != null) {
+                    scheduler.onProcessPreempted(currentProcess);  // ★ reencola vía scheduler
+                } else {
+                    currentProcess.setReady();
+                    readyQueue.enqueue(currentProcess);            // fallback sin scheduler
+                }
                 System.out.println("Quantum de " + currentProcess.name() + " terminado. Reencolado en READY.");
-                currentProcess = null;               // al seleccionar otro se hace reset del quantum
+                currentProcess = null; // el próximo selectNext() hará reset del quantum    
             }
         }
 
@@ -181,6 +184,8 @@ public class CPU {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        
+        if (scheduler != null) scheduler.onTick(simulationTime);
     }
 
     

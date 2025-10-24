@@ -360,6 +360,8 @@ public class CPU {
             SRTF srtf = (SRTF) scheduler;
             Process best = srtf.peekBest();                  // mira el mejor sin sacarlo
             if (best != null && best.remaining() < currentProcess.remaining()) {
+                log("PREEMPT %s (better=%s, %d<%d, t=%d)",
+                    currentProcess.name(), best.name(), best.remaining(), currentProcess.remaining(), simulationTime);
                 scheduler.onProcessPreempted(currentProcess); // reencola el actual a READY
                 currentProcess = null;                        // forzar nueva selección
             }
@@ -372,11 +374,14 @@ public class CPU {
 
         // 3) Ejecutar 1 instrucción
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
+            log("RUN %s (remain=%d, t=%d)", currentProcess.name(), currentProcess.remaining(), simulationTime);
+
             currentProcess.setRunning();
             boolean executed = currentProcess.executeInstruction();
             if (executed) busyCycles++;
 
             if (currentProcess.isBlockedIO()) {
+                log("RUN %s (remain=%d, t=%d)", currentProcess.name(), currentProcess.remaining(), simulationTime);
                 currentProcess.setBlocked();           // estado coherente
                 ioMutex.acquireUninterruptibly();
                 try {
@@ -388,6 +393,7 @@ public class CPU {
                 currentProcess = null;
                 
             } else if (currentProcess.isFinished()) {
+                log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
                 currentProcess.setFinishTime((int) simulationTime);
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;

@@ -116,7 +116,9 @@ public class CPU {
         simulationTime++;
         
         // 1. Procesar I/O
-        processIOQueue();
+        if (!externalIOThread) {
+            processIOQueue();        // modo single-thread
+        }
         
         //System.out.println(currentProcess);  ///////////////////////////
         //if (currentProcess != null) System.out.println(currentProcess.currentState());  ///////////////////////////
@@ -169,7 +171,9 @@ public class CPU {
         simulationTime++;
 
         // 1) Avanza E/S
-        processIOQueue();
+        if (!externalIOThread) {
+            processIOQueue();
+        }
 
         // 2) Selecciona si no hay proceso ejecutando (o si terminó / se bloqueó)
         if (currentProcess == null || currentProcess.isFinished() || currentProcess.isBlockedIO()) {
@@ -235,7 +239,9 @@ public class CPU {
         simulationTime++;
         
         // 1. Procesar I/O
-        processIOQueue(); 
+        if (!externalIOThread) {
+            processIOQueue();
+        }
         
         // 2. Planificar siguiente proceso (si no hay uno actual)
         if (currentProcess == null || currentProcess.isFinished() || 
@@ -276,7 +282,9 @@ public class CPU {
         simulationTime++;
 
         // 1) Avanza la E/S (esto reinyecta a READY vía scheduler.onProcessUnblocked(...))
-        processIOQueue();
+        if (!externalIOThread) {
+            processIOQueue();
+        }
 
         // 1.5) Hook de EXPROPIACIÓN SRTF:
         // si hay un READY con menor remaining() que el RUNNING, desalojar.

@@ -84,7 +84,9 @@ public class CPU {
         
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
         
-        
+        //log de creacion
+        log("NEW %s (pri=%d, ins=%d, type=%s)", name, priority, instructions, type);
+
         allProcesses.add(process);
         
         process.onEnqueuedReady((int) simulationTime);
@@ -114,6 +116,9 @@ public class CPU {
         
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
         
+        //log de creacion
+        log("NEW %s (pri=%d, ins=%d, type=%s)", name, priority, instructions, type);
+
         allProcesses.add(process); 
         
         process.onEnqueuedReady((int) simulationTime);

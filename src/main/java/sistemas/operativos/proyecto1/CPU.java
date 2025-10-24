@@ -351,6 +351,30 @@ public class CPU {
         }
     }
     
+    public void processIOCycleOneTick() {
+        ioMutex.acquireUninterruptibly();
+        readyMutex.acquireUninterruptibly();
+        try {
+            int n = ioQueue.size();
+            for (int i = 0; i < n; i++) {
+                Process p = ioQueue.dequeue();
+                boolean done = p.processIOCycle();
+                if (done) {
+                    p.setReady();
+                    p.onEnqueuedReady((int) simulationTime);
+                    if (scheduler != null) scheduler.onProcessUnblocked(p);
+                    else readyQueue.enqueue(p);
+                    System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
+                } else {
+                    ioQueue.enqueue(p);
+                }
+            }
+        } finally {
+            readyMutex.release();
+            ioMutex.release();
+        }
+    }
+
 
     private void scheduleNextProcess() {
         if (scheduler != null) {

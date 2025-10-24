@@ -48,23 +48,31 @@ public class Simulator {
             case PlanPolicy.FCFS -> {
                 System.out.println("First-Come, First-Served");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+                    
                     cpu.simulateCycleFCFS();
-                    System.out.print("Ciclo: ");  
-                    System.out.println(i);
                     updateReport();
                 }
             }
             case RR -> {
                 System.out.println("Round Robin");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+                    
                     cpu.simulateCycleRR();
-                    System.out.print("Ciclo: ");  
-                    System.out.println(i);  
                 }
             }
             case SRTF -> {
                 System.out.println("Shortest Remaining Time First");
                 for (int i = 1; i <= config.getCyclesAmount(); i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+                    
                     cpu.simulateCycleSRTF();
                 }
             }
@@ -72,9 +80,11 @@ public class Simulator {
             case PRI -> {
                 System.out.println("Cola por prioridad");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+                    
                     cpu.simulateCyclePRI();
-                    System.out.print("Ciclo: ");  
-                    System.out.println(i);  
                 }
             }
             case MFQ -> {
@@ -309,4 +319,12 @@ public class Simulator {
         printReport();
         dumpLogToFile();
     }
+    
+    public long getCyclesDuration() { return config.getCycleDuration(); }
+    public int getCyclesAmount() { return config.getCyclesAmount(); }
+    public int getCyclesQuantum() { return config.getQuantum(); }
+    
+    public void setCyclesDuration(long n) { this.config.setCycleDuration(n); }
+    public void setCyclesAmount(int n) { this.config.setCyclesAmount(n); }
+    public void setCyclesQuantum(int n) { this.config.setQuantum(n); }
 }

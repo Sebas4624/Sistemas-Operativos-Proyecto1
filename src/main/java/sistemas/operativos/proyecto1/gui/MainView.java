@@ -4,6 +4,7 @@
  */
 package sistemas.operativos.proyecto1.gui;
 
+import javax.swing.JFrame;
 import sistemas.operativos.proyecto1.Simulator;
 import sistemas.operativos.proyecto1.Stats;
 
@@ -16,6 +17,9 @@ public class MainView extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainView.class.getName());
     private final Simulator sim;
     private final Stats stats;
+    private Thread starter;
+    private JFrame configView;
+    private JFrame createView;
 
     /**
      * Creates new form MainView
@@ -26,6 +30,13 @@ public class MainView extends javax.swing.JFrame {
         initComponents();
         this.sim = sim;
         this.stats = stats;
+        
+        this.configView = new ConfigView(sim, stats);
+        this.createView = new CreateView(sim, stats);
+        
+        this.starter = new Thread(() -> {
+            sim.startSimulation();
+        }, "Starter-Thread");
         
         updateFields();
     }
@@ -39,6 +50,7 @@ public class MainView extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jMenuItem1 = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         ReadyList = new javax.swing.JList<>();
@@ -46,9 +58,6 @@ public class MainView extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         BlockedList = new javax.swing.JList<>();
         jLabel2 = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
-        currentProcessField = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         completedProcessesField = new javax.swing.JTextField();
@@ -65,7 +74,32 @@ public class MainView extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         fairnessField = new javax.swing.JTextField();
         jPanel4 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        currentProcessField = new javax.swing.JTextField();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        currentProcessIDField = new javax.swing.JTextField();
+        jLabel14 = new javax.swing.JLabel();
+        currentProcessNameField = new javax.swing.JTextField();
+        jLabel15 = new javax.swing.JLabel();
+        currentProcessInstructionsField = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
+        currentProcessPriorityField = new javax.swing.JTextField();
+        jLabel17 = new javax.swing.JLabel();
+        currentProcessPCField = new javax.swing.JTextField();
+        jLabel18 = new javax.swing.JLabel();
+        currentProcessMARField = new javax.swing.JTextField();
+        jPanel6 = new javax.swing.JPanel();
         startButton = new javax.swing.JButton();
+        planPolicySelector = new javax.swing.JComboBox<>();
+        pauseButton = new javax.swing.JButton();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        configButton = new javax.swing.JMenu();
+        createButton = new javax.swing.JMenu();
+
+        jMenuItem1.setText("jMenuItem1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -92,49 +126,6 @@ public class MainView extends javax.swing.JFrame {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel2.setText("Cola \"BLOQUEADO\"");
         jLabel2.setToolTipText("");
-
-        jPanel2.setBackground(new java.awt.Color(34, 34, 34));
-
-        jLabel4.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel4.setText("Proceso Actual:");
-        jLabel4.setToolTipText("");
-
-        currentProcessField.setBackground(new java.awt.Color(24, 24, 24));
-        currentProcessField.setForeground(new java.awt.Color(255, 255, 255));
-        currentProcessField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-        currentProcessField.setText("Ninguno");
-        currentProcessField.setBorder(null);
-        currentProcessField.setCaretColor(new java.awt.Color(255, 255, 255));
-        currentProcessField.setDisabledTextColor(new java.awt.Color(255, 255, 255));
-        currentProcessField.setEnabled(false);
-        currentProcessField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                currentProcessFieldActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(currentProcessField, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(107, Short.MAX_VALUE))
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(currentProcessField)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
 
         jPanel3.setBackground(new java.awt.Color(34, 34, 34));
 
@@ -354,10 +345,255 @@ public class MainView extends javax.swing.JFrame {
 
         jPanel4.setBackground(new java.awt.Color(34, 34, 34));
 
+        jPanel2.setBackground(new java.awt.Color(51, 51, 51));
+
+        jLabel4.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel4.setText("Proceso Actual:");
+        jLabel4.setToolTipText("");
+
+        currentProcessField.setBackground(new java.awt.Color(24, 24, 24));
+        currentProcessField.setForeground(new java.awt.Color(255, 255, 255));
+        currentProcessField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        currentProcessField.setText("Ninguno");
+        currentProcessField.setBorder(null);
+        currentProcessField.setCaretColor(new java.awt.Color(255, 255, 255));
+        currentProcessField.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        currentProcessField.setEnabled(false);
+        currentProcessField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                currentProcessFieldActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(currentProcessField, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(151, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(currentProcessField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel5.setBackground(new java.awt.Color(51, 51, 51));
+
+        jLabel12.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel12.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel12.setText("Detalles del proceso");
+        jLabel12.setToolTipText("");
+
+        jLabel13.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel13.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel13.setText("ID:");
+        jLabel13.setToolTipText("");
+
+        currentProcessIDField.setBackground(new java.awt.Color(24, 24, 24));
+        currentProcessIDField.setForeground(new java.awt.Color(255, 255, 255));
+        currentProcessIDField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        currentProcessIDField.setText("Ninguno");
+        currentProcessIDField.setBorder(null);
+        currentProcessIDField.setCaretColor(new java.awt.Color(255, 255, 255));
+        currentProcessIDField.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        currentProcessIDField.setEnabled(false);
+        currentProcessIDField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                currentProcessIDFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel14.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel14.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel14.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel14.setText("Nombre:");
+        jLabel14.setToolTipText("");
+
+        currentProcessNameField.setBackground(new java.awt.Color(24, 24, 24));
+        currentProcessNameField.setForeground(new java.awt.Color(255, 255, 255));
+        currentProcessNameField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        currentProcessNameField.setText("Ninguno");
+        currentProcessNameField.setBorder(null);
+        currentProcessNameField.setCaretColor(new java.awt.Color(255, 255, 255));
+        currentProcessNameField.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        currentProcessNameField.setEnabled(false);
+        currentProcessNameField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                currentProcessNameFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel15.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel15.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel15.setText("Instrucciones restantes:");
+        jLabel15.setToolTipText("");
+
+        currentProcessInstructionsField.setBackground(new java.awt.Color(24, 24, 24));
+        currentProcessInstructionsField.setForeground(new java.awt.Color(255, 255, 255));
+        currentProcessInstructionsField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        currentProcessInstructionsField.setText("0 de 0");
+        currentProcessInstructionsField.setBorder(null);
+        currentProcessInstructionsField.setCaretColor(new java.awt.Color(255, 255, 255));
+        currentProcessInstructionsField.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        currentProcessInstructionsField.setEnabled(false);
+        currentProcessInstructionsField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                currentProcessInstructionsFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel16.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel16.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel16.setText("Nivel de prioridad:");
+        jLabel16.setToolTipText("");
+
+        currentProcessPriorityField.setBackground(new java.awt.Color(24, 24, 24));
+        currentProcessPriorityField.setForeground(new java.awt.Color(255, 255, 255));
+        currentProcessPriorityField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        currentProcessPriorityField.setText("0");
+        currentProcessPriorityField.setBorder(null);
+        currentProcessPriorityField.setCaretColor(new java.awt.Color(255, 255, 255));
+        currentProcessPriorityField.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        currentProcessPriorityField.setEnabled(false);
+        currentProcessPriorityField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                currentProcessPriorityFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel17.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel17.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel17.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel17.setText("PC:");
+        jLabel17.setToolTipText("");
+
+        currentProcessPCField.setBackground(new java.awt.Color(24, 24, 24));
+        currentProcessPCField.setForeground(new java.awt.Color(255, 255, 255));
+        currentProcessPCField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        currentProcessPCField.setText("0");
+        currentProcessPCField.setBorder(null);
+        currentProcessPCField.setCaretColor(new java.awt.Color(255, 255, 255));
+        currentProcessPCField.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        currentProcessPCField.setEnabled(false);
+        currentProcessPCField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                currentProcessPCFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel18.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel18.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel18.setText("MAR:");
+        jLabel18.setToolTipText("");
+
+        currentProcessMARField.setBackground(new java.awt.Color(24, 24, 24));
+        currentProcessMARField.setForeground(new java.awt.Color(255, 255, 255));
+        currentProcessMARField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        currentProcessMARField.setText("0");
+        currentProcessMARField.setBorder(null);
+        currentProcessMARField.setCaretColor(new java.awt.Color(255, 255, 255));
+        currentProcessMARField.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        currentProcessMARField.setEnabled(false);
+        currentProcessMARField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                currentProcessMARFieldActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel12)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel18)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(currentProcessMARField))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel17)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(currentProcessPCField))
+                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel16)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(currentProcessPriorityField))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel15)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(currentProcessInstructionsField))
+                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel14)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(currentProcessNameField))
+                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel13)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(currentProcessIDField)))))
+                .addContainerGap())
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(currentProcessIDField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel13))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(currentProcessNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel14))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(currentProcessInstructionsField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel15))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel16)
+                    .addComponent(currentProcessPriorityField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel17)
+                    .addComponent(currentProcessPCField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel18)
+                    .addComponent(currentProcessMARField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel6.setBackground(new java.awt.Color(51, 51, 51));
+
         startButton.setBackground(new java.awt.Color(85, 85, 85));
         startButton.setFont(new java.awt.Font("Nirmala UI", 1, 16)); // NOI18N
         startButton.setForeground(new java.awt.Color(255, 255, 255));
         startButton.setText("Iniciar");
+        startButton.setFocusable(false);
         startButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 startButtonMousePressed(evt);
@@ -369,20 +605,80 @@ public class MainView extends javax.swing.JFrame {
             }
         });
 
+        planPolicySelector.setBackground(new java.awt.Color(85, 85, 85));
+        planPolicySelector.setForeground(new java.awt.Color(255, 255, 255));
+        planPolicySelector.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "FCFS", "RR", "SPN", "STR", "PRI", "MFQ" }));
+        planPolicySelector.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                planPolicySelectorActionPerformed(evt);
+            }
+        });
+
+        pauseButton.setBackground(new java.awt.Color(85, 85, 85));
+        pauseButton.setFont(new java.awt.Font("Nirmala UI", 1, 16)); // NOI18N
+        pauseButton.setForeground(new java.awt.Color(255, 255, 255));
+        pauseButton.setText("Pausar");
+        pauseButton.setEnabled(false);
+        pauseButton.setFocusable(false);
+        pauseButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                pauseButtonMousePressed(evt);
+            }
+        });
+        pauseButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pauseButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(planPolicySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(pauseButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(startButton)
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addGap(2, 2, 2)
+                        .addComponent(planPolicySelector, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(startButton)
+                        .addComponent(pauseButton)))
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap(402, Short.MAX_VALUE)
-                .addComponent(startButton)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(startButton)
+                .addContainerGap()
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -394,16 +690,15 @@ public class MainView extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(jPanel1Layout.createSequentialGroup()
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -411,20 +706,43 @@ public class MainView extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2))
                 .addGap(8, 8, 8)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
+
+        jMenuBar1.setBackground(new java.awt.Color(51, 51, 51));
+        jMenuBar1.setForeground(new java.awt.Color(255, 255, 255));
+
+        configButton.setBackground(new java.awt.Color(51, 51, 51));
+        configButton.setForeground(new java.awt.Color(255, 255, 255));
+        configButton.setText("Configurar");
+        configButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                configButtonMousePressed(evt);
+            }
+        });
+        jMenuBar1.add(configButton);
+
+        createButton.setBackground(new java.awt.Color(51, 51, 51));
+        createButton.setForeground(new java.awt.Color(255, 255, 255));
+        createButton.setText("Añadir Proceso");
+        createButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                createButtonMousePressed(evt);
+            }
+        });
+        jMenuBar1.add(createButton);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -477,14 +795,60 @@ public class MainView extends javax.swing.JFrame {
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void startButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_startButtonMousePressed
-        Thread starter = new Thread(() -> {
-            sim.startSimulation();
-        }, "Starter-Thread");
-        
         starter.start();
         
         this.startButton.setEnabled(false);
+        this.pauseButton.setEnabled(true);
     }//GEN-LAST:event_startButtonMousePressed
+
+    private void currentProcessIDFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currentProcessIDFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_currentProcessIDFieldActionPerformed
+
+    private void currentProcessNameFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currentProcessNameFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_currentProcessNameFieldActionPerformed
+
+    private void currentProcessInstructionsFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currentProcessInstructionsFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_currentProcessInstructionsFieldActionPerformed
+
+    private void currentProcessPriorityFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currentProcessPriorityFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_currentProcessPriorityFieldActionPerformed
+
+    private void currentProcessPCFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currentProcessPCFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_currentProcessPCFieldActionPerformed
+
+    private void currentProcessMARFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currentProcessMARFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_currentProcessMARFieldActionPerformed
+
+    private void planPolicySelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_planPolicySelectorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_planPolicySelectorActionPerformed
+
+    private void pauseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pauseButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_pauseButtonActionPerformed
+
+    private void pauseButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pauseButtonMousePressed
+        starter.interrupt();
+        
+        this.startButton.setEnabled(true);
+        this.pauseButton.setEnabled(false);
+    }//GEN-LAST:event_pauseButtonMousePressed
+
+    private void configButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configButtonMousePressed
+        // TODO add your handling code here:
+        configView.setVisible(true);
+    }//GEN-LAST:event_configButtonMousePressed
+
+    private void createButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_createButtonMousePressed
+        // TODO add your handling code here:
+        createView.setVisible(true);
+    }//GEN-LAST:event_createButtonMousePressed
 
     /**
      * @param args the command line arguments
@@ -516,7 +880,7 @@ public class MainView extends javax.swing.JFrame {
         Thread updater = new Thread(() -> {
             while(true) {
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(100);
 
                     String newCompletedProcessesField = String.valueOf(this.stats.completedProcesses) + " de " + String.valueOf(this.stats.totalProcesses);
                     String newAvgWaitField = Double.isNaN(this.stats.avgWait) ? "0.00" : String.format("%.2f", this.stats.avgWait);
@@ -529,6 +893,13 @@ public class MainView extends javax.swing.JFrame {
                     String newCurrentField = this.stats.isCurrentProcessAvailable() ? this.stats.currentProcess.name() : "Ninguno";
                     String[] newReadyList = this.stats.getReadyQueueList();
                     String[] newIoList = this.stats.getIoQueueList();
+                    
+                    String newId = this.stats.isCurrentProcessAvailable() ? this.stats.currentProcess.id() : "Ninguno";
+                    String newName = this.stats.isCurrentProcessAvailable() ? this.stats.currentProcess.name() : "Ninguno";
+                    String newInstructions = this.stats.isCurrentProcessAvailable() ? String.valueOf(this.stats.currentProcess.remaining()) + " de " + String.valueOf(this.stats.currentProcess.instructions()) : "0 de 0";
+                    String newPriority = this.stats.isCurrentProcessAvailable() ? String.valueOf(this.stats.currentProcess.priority()) : "0";
+                    String newPC = this.stats.isCurrentProcessAvailable() ? String.valueOf(this.stats.currentProcess.pc()) : "0";
+                    String newMAR = this.stats.isCurrentProcessAvailable() ? String.valueOf(this.stats.currentProcess.mar()) : "0";
 
                     this.completedProcessesField.setText(newCompletedProcessesField);
                     this.avgWaitField.setText(newAvgWaitField);
@@ -541,13 +912,19 @@ public class MainView extends javax.swing.JFrame {
                     this.currentProcessField.setText(newCurrentField);
                     this.ReadyList.setListData(newReadyList);
                     this.BlockedList.setListData(newIoList);
+                    
+                    this.currentProcessIDField.setText(newId);
+                    this.currentProcessNameField.setText(newName);
+                    this.currentProcessInstructionsField.setText(newInstructions);
+                    this.currentProcessPriorityField.setText(newPriority);
+                    this.currentProcessPCField.setText(newPC);
+                    this.currentProcessMARField.setText(newMAR);
                 } catch (InterruptedException e) {
                      Thread.currentThread().interrupt();
                 }
             }
         }, "External-Updater");
-
-       
+        
         updater.start();
     }
 
@@ -558,12 +935,27 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JTextField avgTurnField;
     private javax.swing.JTextField avgWaitField;
     private javax.swing.JTextField completedProcessesField;
+    private javax.swing.JMenu configButton;
     private javax.swing.JTextField cpuUsageField;
+    private javax.swing.JMenu createButton;
     private javax.swing.JTextField currentProcessField;
+    private javax.swing.JTextField currentProcessIDField;
+    private javax.swing.JTextField currentProcessInstructionsField;
+    private javax.swing.JTextField currentProcessMARField;
+    private javax.swing.JTextField currentProcessNameField;
+    private javax.swing.JTextField currentProcessPCField;
+    private javax.swing.JTextField currentProcessPriorityField;
     private javax.swing.JTextField fairnessField;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -571,12 +963,18 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JButton pauseButton;
+    private javax.swing.JComboBox<String> planPolicySelector;
     private javax.swing.JButton startButton;
     private javax.swing.JTextField throughputField;
     // End of variables declaration//GEN-END:variables

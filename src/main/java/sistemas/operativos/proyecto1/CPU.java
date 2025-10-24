@@ -200,7 +200,12 @@ public class CPU {
             // *** PRIORIDAD 2: se bloqueó por E/S ***
             else if (currentProcess.isBlockedIO()) {
                 currentProcess.setBlocked();
-                ioQueue.enqueue(currentProcess);
+                ioMutex.acquireUninterruptibly();
+                try{
+                    ioQueue.enqueue(currentProcess);
+                } finally {
+                    ioMutex.release();
+                }
                 System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
                 currentProcess = null;  // el próximo ciclo selecciona otro y resetea quantum
             }
@@ -213,8 +218,12 @@ public class CPU {
                     scheduler.onProcessPreempted(currentProcess);
                 } else {
                     currentProcess.setReady();
-                    readyQueue.enqueue(currentProcess);
-                }
+                    readyMutex.acquireUninterruptibly();
+                    try {
+                        readyQueue.enqueue(currentProcess);
+                    } finally {
+                        readyMutex.release();
+                    }
                 System.out.println("Quantum de " + currentProcess.name() + " terminado. Reencolado en READY.");
                 currentProcess = null; // el próximo selectNext() hará reset del quantum
             }
@@ -228,6 +237,7 @@ public class CPU {
         }
         
         if (scheduler != null) scheduler.onTick(simulationTime);
+        }
     }
 
     

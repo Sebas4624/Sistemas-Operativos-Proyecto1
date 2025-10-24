@@ -136,17 +136,21 @@ public class CPU {
             if (executed) busyCycles++; 
 
             if (currentProcess.isBlockedIO()) {
-                currentProcess.setBlocked();               // marca BLOQUEADO
-                ioQueue.enqueue(currentProcess);
+                currentProcess.setBlocked(); 
+                ioMutex.acquireUninterruptibly();
+                try{
+                    ioQueue.enqueue(currentProcess);
+                } finally {
+                    ioMutex.release();
+                }
                 System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
                 currentProcess = null;
+                
             } else if (currentProcess.isFinished()) {
                 currentProcess.setFinishTime((int) simulationTime);   //guarda fin
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
-            } else {
-                // ejecutó una instrucción pero sigue RUNNING
-            }
+            } 
         
         
         // 4. Esperar según la duración del ciclo configurada

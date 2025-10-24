@@ -11,6 +11,7 @@ import sistemas.operativos.proyecto1.sched.FCFS;
 import sistemas.operativos.proyecto1.sched.SRTF;
 import java.util.concurrent.Semaphore;
 
+
 /**
  * Clase CPU del simulador.
  * @author Sebastián
@@ -28,6 +29,8 @@ public class CPU {
     private final Semaphore readyMutex = new Semaphore(1, true);
     private final Semaphore ioMutex    = new Semaphore(1, true);
     private final Semaphore cpuMutex   = new Semaphore(1, true);
+    private final java.util.List<sistemas.operativos.proyecto1.process.Process> allProcesses = new java.util.ArrayList<>();
+
     
     // Si true, la E/S la hará un hilo externo (no se llama processIOQueue() desde CPU):
     private volatile boolean externalIOThread = false;
@@ -35,10 +38,14 @@ public class CPU {
     
     public long getBusyCycles() { return busyCycles; }
 
-
     public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
         this.scheduler = s;
     }
+    
+    public java.util.List<sistemas.operativos.proyecto1.process.Process> getAllProcesses() {
+        return allProcesses;
+    }
+    
     /**
      * Constructor.
      * @param config Configuración del simulador. 

@@ -10,7 +10,8 @@ import sistemas.operativos.proyecto1.sched.Scheduler;
 public class Simulator {
     private Config config;
     private CPU cpu = new CPU(config);
-    
+    private Thread cpuThread, ioThread;
+    private volatile boolean running = false;
     /**
      * Constructor.
      */
@@ -91,5 +92,44 @@ public class Simulator {
             case PRI -> cpu.createPriorityProcess(name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
             default -> cpu.createProcess(name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
         }
+    }
+    
+    
+    public void startSimulationAsync() {
+        running = true;
+        cpu.enableExternalIOThread(true);
+
+        cpuThread = new Thread(() -> {
+            while (running) {
+                switch (config.getPolicy()) {
+                    case PlanPolicy.FCFS -> cpu.simulateCycleFCFS();
+                    case PlanPolicy.RR   -> cpu.simulateCycleRR();
+                    case PlanPolicy.PRI  -> cpu.simulateCyclePRI();
+                    case PlanPolicy.SRTF -> cpu.simulateCycleSRTF();
+                    // Si todavía no tienes loop específico:
+                    case PlanPolicy.SJF  -> cpu.simulateCycleFCFS();   
+                    case PlanPolicy.HRRN -> cpu.simulateCycleFCFS();   
+                    default -> throw new AssertionError(config.getPolicy().name());
+                }
+            }
+        }, "CPU-Thread");
+
+        ioThread = new Thread(() -> {
+            while (running) {
+                cpu.processIOCycleOneTick();
+                try { Thread.sleep(config.getCycleDuration()); }
+                catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
+            }
+        }, "IO-Thread");
+
+        cpuThread.start();
+        ioThread.start();
+     }
+
+    public void stopSimulation() {
+        running = false;
+        if (cpuThread != null) cpuThread.interrupt();
+        if (ioThread  != null) ioThread.interrupt();
+        cpu.enableExternalIOThread(false);
     }
 }

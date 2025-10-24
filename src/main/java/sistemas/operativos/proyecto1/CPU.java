@@ -68,7 +68,6 @@ public class CPU {
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
         
         process.onEnqueuedReady((int) simulationTime);
-        
         readyMutex.acquireUninterruptibly();
 
         try {
@@ -96,8 +95,8 @@ public class CPU {
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
         
         process.onEnqueuedReady((int) simulationTime);
-        
         readyMutex.acquireUninterruptibly();
+        
         try {
             if (scheduler != null) scheduler.onProcessArrived(process);
             else readyPriorityQueue.add(process); // fallback legacy

@@ -272,9 +272,15 @@ public class CPU {
             
             if (currentProcess.isBlockedIO()) {
                 currentProcess.setBlocked();    // marca estado
-                ioQueue.enqueue(currentProcess);
+                ioMutex.acquireUninterruptibly();
+                try{ 
+                    ioQueue.enqueue(currentProcess);
+                } finally {
+                    ioMutex.release();
+                }
                 System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
                 currentProcess = null;
+                
             } else if (currentProcess.isFinished()) {
                 currentProcess.setFinishTime((int) simulationTime);
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");

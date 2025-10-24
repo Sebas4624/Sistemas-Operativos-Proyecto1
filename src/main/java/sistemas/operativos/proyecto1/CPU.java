@@ -6,8 +6,6 @@ import sistemas.operativos.proyecto1.lib.Queue;
 import sistemas.operativos.proyecto1.lib.PriorityQueue;
 import sistemas.operativos.proyecto1.process.Process;
 import sistemas.operativos.proyecto1.process.ProcessType;
-import sistemas.operativos.proyecto1.sched.Scheduler;
-import sistemas.operativos.proyecto1.sched.FCFS;
 import sistemas.operativos.proyecto1.sched.SRTF;
 import java.util.concurrent.Semaphore;
 
@@ -74,6 +72,9 @@ public class CPU {
         
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
         
+        
+        allProcesses.add(process);
+        
         process.onEnqueuedReady((int) simulationTime);
         readyMutex.acquireUninterruptibly();
 
@@ -100,6 +101,8 @@ public class CPU {
         String id = java.time.LocalTime.now().toString();
         
         Process process = new Process(id, name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
+        
+        allProcesses.add(process); 
         
         process.onEnqueuedReady((int) simulationTime);
         readyMutex.acquireUninterruptibly();

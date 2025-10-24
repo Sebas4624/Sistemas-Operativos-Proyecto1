@@ -385,23 +385,35 @@ public class CPU {
 
 
     private void scheduleNextProcess() {
-        if (scheduler != null) {
-            currentProcess = scheduler.selectNext();
-        } else if (!readyQueue.isEmpty()) {
-            currentProcess = readyQueue.dequeue(); 
-        } else {
-            currentProcess = null;
-        }
-
-        if (currentProcess != null) {
-            currentProcess.setRunning();  
-            
-            currentProcess.onDispatchedToCpu((int) simulationTime);
-            if (currentProcess.startTime() == null) {
-                currentProcess.setStartTime((int) simulationTime);  // para response/turnaround
+        cpuMutex.acquireUninterruptibly();
+        readyMutex.acquireUninterruptibly();
+        try {
+            if (scheduler != null) {
+                currentProcess = scheduler.selectNext();
+            } else if (!readyQueue.isEmpty()) {
+                currentProcess = readyQueue.dequeue();
+            } else {
+                currentProcess = null;
             }
+
+            if (currentProcess != null) {
+                // Cambia a RUNNING
+                currentProcess.setRunning();
+
+                // Métricas: tiempo de espera y de primera respuesta
+                currentProcess.onDispatchedToCpu((int) simulationTime);
+                if (currentProcess.startTime() == null) {
+                    currentProcess.setStartTime((int) simulationTime);
+                }
+            }
+        } finally {
+            // Siempre liberar en el orden inverso
+            readyMutex.release();
+            cpuMutex.release();
         }
     }
+
+   
 
    
     private void processIOPriorityQueue() {

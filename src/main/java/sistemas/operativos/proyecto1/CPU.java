@@ -212,19 +212,27 @@ public class CPU {
 
         // 3) Ejecuta un ciclo del proceso actual (si lo hay)
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
+            log("RUN %s (remain=%d, qrem=%d, t=%d)",
+                currentProcess.name(), currentProcess.remaining(),
+                config.getRemainingQuantum(), simulationTime);
+            
             currentProcess.setRunning();
             boolean executed = currentProcess.executeInstruction();
             if (executed) busyCycles++;    
             config.reduceRemainingQuantum();
 
-            // *** PRIORIDAD 1: terminó ***
+            // PRIORIDAD 1: terminó
             if (currentProcess.isFinished()) {
+                log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
+
                 currentProcess.setFinishTime((int) simulationTime); //
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;  // el próximo ciclo selecciona otro y resetea quantum
             }
-            // *** PRIORIDAD 2: se bloqueó por E/S ***
+            //PRIORIDAD 2: se bloqueó por E/S 
             else if (currentProcess.isBlockedIO()) {
+                log("BLOCK %s -> IO (t=%d)", currentProcess.name(), simulationTime);
+
                 currentProcess.setBlocked();
                 ioMutex.acquireUninterruptibly();
                 try{
@@ -235,8 +243,10 @@ public class CPU {
                 System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
                 currentProcess = null;  // el próximo ciclo selecciona otro y resetea quantum
             }
-            // *** PRIORIDAD 3: venció el quantum (RR) ***
+            //  PRIORIDAD 3: venció el quantum (RR) 
             else if (config.getRemainingQuantum() == 0) {
+                log("PREEMPT %s (quantum=0) -> READY (t=%d)", currentProcess.name(), simulationTime);
+
                 // métrica: va a READY
                 currentProcess.onEnqueuedReady((int) simulationTime);
 
@@ -435,7 +445,6 @@ public class CPU {
         }
     }
 
-
     private void scheduleNextProcess() {
         cpuMutex.acquireUninterruptibly();
         readyMutex.acquireUninterruptibly();
@@ -464,8 +473,6 @@ public class CPU {
             cpuMutex.release();
         }
     }
-
-   
 
    
     private void processIOPriorityQueue() {

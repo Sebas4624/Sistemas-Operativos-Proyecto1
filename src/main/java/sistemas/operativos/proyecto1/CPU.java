@@ -27,8 +27,12 @@ public class CPU {
     private final Semaphore readyMutex = new Semaphore(1, true);
     private final Semaphore ioMutex    = new Semaphore(1, true);
     private final Semaphore cpuMutex   = new Semaphore(1, true);
+    
     private final java.util.List<sistemas.operativos.proyecto1.process.Process> allProcesses = new java.util.ArrayList<>();
-
+    
+    public java.util.List<sistemas.operativos.proyecto1.process.Process> getAllProcesses() {
+        return allProcesses;
+    }
     
     // Si true, la E/S la hará un hilo externo (no se llama processIOQueue() desde CPU):
     private volatile boolean externalIOThread = false;
@@ -40,10 +44,18 @@ public class CPU {
         this.scheduler = s;
     }
     
-    public java.util.List<sistemas.operativos.proyecto1.process.Process> getAllProcesses() {
-        return allProcesses;
+        //log
+    private final java.util.List<String> eventLog = new java.util.ArrayList<>();
+
+    private void log(String fmt, Object... args) {
+        String line = String.format("[%06d] ", simulationTime) + String.format(fmt, args);
+        eventLog.add(line);
     }
-    
+
+    public java.util.List<String> getEventLog() {
+        return java.util.Collections.unmodifiableList(eventLog);
+    }
+
     /**
      * Constructor.
      * @param config Configuración del simulador. 

@@ -449,9 +449,9 @@ public class CPU {
             }
 
             if (currentProcess != null) {
+                log("DISPATCH %s", currentProcess.name());
                 // Cambia a RUNNING
                 currentProcess.setRunning();
-
                 // Métricas: tiempo de espera y de primera respuesta
                 currentProcess.onDispatchedToCpu((int) simulationTime);
                 if (currentProcess.startTime() == null) {

@@ -74,6 +74,7 @@ public class Simulator {
             }
             default -> throw new AssertionError(config.getPolicy().name());
         }
+        printReport();
     }
     
     /**
@@ -94,7 +95,81 @@ public class Simulator {
         }
     }
     
-    
+    public void printReport() {
+        var procs = cpu.getAllProcesses();
+        int n = procs.size();
+        if (n == 0) {
+            System.out.println("No hay procesos para reportar.");
+            return;
+        }
+
+        long completed = 0;
+        long sumWait = 0;
+        long sumResp = 0;
+        long sumTurn = 0;
+        
+        int  respCount = 0;
+        int turnCount = 0;
+
+        // Para “equidad” (fairness), usaremos Jain sobre el tiempo de espera:
+        // J = ( (Σw)^2 ) / ( n * Σ(w^2) ),  0< J ≤ 1 (1 es perfectamente justo)
+        double sumW = 0.0;
+        double sumW2 = 0.0;
+
+        System.out.println("\n===== REPORTE =====");
+        for (var p : procs) {
+            Integer start  = p.firstRun();
+            Integer finish = p.finishTime();
+            long wait      = p.totalWait();                   // ya lo acumulas con onEnqueuedReady/onDispatchedToCpu
+            Integer arr    = p.arrival();
+
+            Integer resp   = (start == null || arr == null)  ? null : (start - arr);
+            Integer turn   = (finish == null || arr == null) ? null : (finish - arr);
+
+            if (finish != null) completed++;
+
+            sumWait += wait;
+             if (resp != null) { sumResp += resp; respCount++; }
+             if (turn != null) { sumTurn += turn; turnCount++; }
+             
+            sumW  += wait;
+            sumW2 += ((double)wait)*wait;
+
+            System.out.printf(
+                "%s  arr=%d  start=%s  finish=%s  wait=%d  resp=%s  turn=%s  pc=%d%n",
+                p.name(), arr,
+                String.valueOf(start), String.valueOf(finish),
+                wait,
+                String.valueOf(resp), String.valueOf(turn),
+                p.pc() // servicio efectivamente ejecutado
+            );
+        }
+
+        // Promedios (se calculan sobre los que tienen valor)
+        double avgWait = n == 0 ? 0 : (double) sumWait / n;
+        double avgResp = n == 0 ? 0 : (double) sumResp / respCount;
+        double avgTurn = n == 0 ? 0 : (double) sumTurn / turnCount;
+
+        // Utilización de CPU
+        long busy = cpu.getBusyCycles();
+        long totalCycles = config.getCyclesAmount();
+        double util = totalCycles == 0 ? 0 : (100.0 * busy / totalCycles);
+
+        // Throughput = procesos completados / tiempo total simulado (en ciclos)
+        double throughput = totalCycles == 0 ? 0 : ((double) completed / totalCycles);
+
+        // Fairness (Jain) sobre los tiempos de espera
+        double fairness  = (n == 0 || sumW2 == 0.0) ? 1.0 : ((sumW * sumW) / (n * sumW2));
+
+        System.out.println("----- Agregados -----");
+        System.out.printf("Completados: %d de %d%n", completed, n);
+        System.out.printf("Promedio WAIT: %.2f  | RESP: %.2f  | TURN: %.2f%n", avgWait, avgResp, avgTurn);
+        System.out.printf("CPU Utilization: %.1f%%%n", util);
+        System.out.printf("Throughput (proc/ciclo): %.4f%n", throughput);
+        System.out.printf("Fairness (Jain sobre WAIT): %.3f%n", fairness);
+        System.out.println("====================\n");
+    }
+
     public void startSimulationAsync() {
         running = true;
         cpu.enableExternalIOThread(true);
@@ -131,5 +206,6 @@ public class Simulator {
         if (cpuThread != null) cpuThread.interrupt();
         if (ioThread  != null) ioThread.interrupt();
         cpu.enableExternalIOThread(false);
+        printReport();
     }
 }

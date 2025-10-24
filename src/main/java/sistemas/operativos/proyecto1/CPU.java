@@ -426,6 +426,9 @@ public class CPU {
                 p.setReady();
                 p.onEnqueuedReady((int) simulationTime);
                 
+                log("IO-DONE %s -> READY (t=%d)", p.name(), simulationTime);
+
+                
                 if (scheduler != null) {
                     scheduler.onProcessUnblocked(p);
                 }
@@ -450,6 +453,9 @@ public class CPU {
                 if (done) {
                     p.setReady();
                     p.onEnqueuedReady((int) simulationTime);
+                    
+                    log("IO-DONE %s -> READY (t=%d)", p.name(), simulationTime);
+             
                     if (scheduler != null) scheduler.onProcessUnblocked(p);
                     else readyQueue.enqueue(p);
                     System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");

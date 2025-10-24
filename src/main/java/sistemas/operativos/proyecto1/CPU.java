@@ -307,12 +307,17 @@ public class CPU {
         
         // 3. Ejecutar proceso actual
         if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
+            log("RUN %s (remain=%d, pri=%d, t=%d)",
+                currentProcess.name(), currentProcess.remaining(), currentProcess.priority(), simulationTime);
+
             currentProcess.setRunning();
             boolean executed = currentProcess.executeInstruction();
             if (executed) busyCycles++;
             //System.out.println("Instrucción ejecutada");  ///////////////////////////
             
             if (currentProcess.isBlockedIO()) {
+                log("BLOCK %s -> IO (t=%d)", currentProcess.name(), simulationTime);
+
                 currentProcess.setBlocked();    // marca estado
                 ioMutex.acquireUninterruptibly();
                 try{ 
@@ -324,6 +329,7 @@ public class CPU {
                 currentProcess = null;
                 
             } else if (currentProcess.isFinished()) {
+                log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
                 currentProcess.setFinishTime((int) simulationTime);
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;

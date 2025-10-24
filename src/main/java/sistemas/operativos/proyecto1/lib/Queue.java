@@ -22,6 +22,8 @@ public class Queue<T> implements Iterable<T> {
 
     public java.util.Iterator<T> iterator() { return list.iterator(); }
     
+    public LinkedList<T> toLinkedList() { return list; }
+    
     @Override
     public String toString() { return list.toString(); }
 }

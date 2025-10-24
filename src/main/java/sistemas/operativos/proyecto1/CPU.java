@@ -1,8 +1,7 @@
 package sistemas.operativos.proyecto1;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import sistemas.operativos.proyecto1.lib.Queue;
+import sistemas.operativos.proyecto1.lib.LinkedList;
 import sistemas.operativos.proyecto1.lib.PriorityQueue;
 import sistemas.operativos.proyecto1.process.Process;
 import sistemas.operativos.proyecto1.process.ProcessType;
@@ -515,4 +514,15 @@ public class CPU {
         }
     }
 
+    public Process getCurrentProcess() {
+        return this.currentProcess;
+    }
+
+    public LinkedList<Process> getReadyQueue() {
+        return this.readyQueue.toLinkedList();
+    }
+
+    public LinkedList<Process> getIoQueue() {
+        return this.ioQueue.toLinkedList();
+    }
 }

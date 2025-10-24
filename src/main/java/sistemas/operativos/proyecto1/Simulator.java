@@ -75,6 +75,7 @@ public class Simulator {
             default -> throw new AssertionError(config.getPolicy().name());
         }
         printReport();
+        dumpLogToFile();
     }
     
     /**
@@ -169,6 +170,17 @@ public class Simulator {
         System.out.printf("Fairness (Jain sobre WAIT): %.3f%n", fairness);
         System.out.println("====================\n");
     }
+    
+    private void dumpLogToFile() {
+        try {
+            java.nio.file.Path out = java.nio.file.Path.of("events.log");
+            java.nio.file.Files.write(out, cpu.getEventLog(), java.nio.charset.StandardCharsets.UTF_8);
+            System.out.println("Log de eventos escrito en " + out.toAbsolutePath());
+        } catch (Exception e) {
+            System.err.println("No se pudo escribir events.log: " + e.getMessage());
+        }
+    }
+
 
     public void startSimulationAsync() {
         running = true;
@@ -207,5 +219,6 @@ public class Simulator {
         if (ioThread  != null) ioThread.interrupt();
         cpu.enableExternalIOThread(false);
         printReport();
+        dumpLogToFile();
     }
 }

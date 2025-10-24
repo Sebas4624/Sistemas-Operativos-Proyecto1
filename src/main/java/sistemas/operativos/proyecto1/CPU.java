@@ -362,6 +362,7 @@ public class CPU {
             if (best != null && best.remaining() < currentProcess.remaining()) {
                 log("PREEMPT %s (better=%s, %d<%d, t=%d)",
                     currentProcess.name(), best.name(), best.remaining(), currentProcess.remaining(), simulationTime);
+                currentProcess.onEnqueuedReady((int) simulationTime);
                 scheduler.onProcessPreempted(currentProcess); // reencola el actual a READY
                 currentProcess = null;                        // forzar nueva selección
             }
@@ -381,7 +382,7 @@ public class CPU {
             if (executed) busyCycles++;
 
             if (currentProcess.isBlockedIO()) {
-                log("RUN %s (remain=%d, t=%d)", currentProcess.name(), currentProcess.remaining(), simulationTime);
+                log("BLOCK %s -> IO (t=%d)", currentProcess.name(), simulationTime); // ← corregido
                 currentProcess.setBlocked();           // estado coherente
                 ioMutex.acquireUninterruptibly();
                 try {

@@ -9,18 +9,18 @@ import sistemas.operativos.proyecto1.sched.Scheduler;
  * @author Sebastián
  */
 public class Simulator {
-    private Config config;
-    private CPU cpu = new CPU(config);
+    private final Config config;
+    private final CPU cpu;
+    private final Stats stats;
     private Thread cpuThread, ioThread;
     private volatile boolean running = false;
-    private Stats stats;
     /**
      * Constructor.
      * @param stats
      */
     public Simulator(Stats stats) {
         this.config = new Config(100);
-        this.cpu = new CPU(config);
+        this.cpu = new CPU(config, stats);
         this.stats = stats;
     }
     
@@ -31,7 +31,7 @@ public class Simulator {
      */
     public Simulator(Stats stats, Config config) {
         this.config = config;
-        this.cpu = new CPU(config);
+        this.cpu = new CPU(config, stats);
         this.stats = stats;
     }
     

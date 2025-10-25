@@ -18,8 +18,10 @@ public class CPU {
     private final Queue<Process> readyQueue;
     private final PriorityQueue<Process> readyPriorityQueue;
     private final Queue<Process> ioQueue;
+    private final Queue<Process> finishedQueue;
     private Process currentProcess;
     private final Config config;
+    private final Stats stats;
     private long simulationTime;
     private long busyCycles = 0;    
     private sistemas.operativos.proyecto1.sched.Scheduler scheduler;
@@ -59,11 +61,13 @@ public class CPU {
      * Constructor.
      * @param config Configuración del simulador. 
      */
-    public CPU(Config config) {
+    public CPU(Config config, Stats stats) {
         this.readyQueue = new Queue();
         this.readyPriorityQueue = new PriorityQueue();
         this.ioQueue = new Queue();
+        this.finishedQueue = new Queue();
         this.config = config;
+        this.stats = stats;
         this.simulationTime = 0;
     }
     
@@ -177,8 +181,12 @@ public class CPU {
                 
             } else if (currentProcess.isFinished()) {
                 log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
-
+                
                 currentProcess.setFinishTime((int) simulationTime);   //guarda fin
+                
+                finishedQueue.enqueue(currentProcess);
+                this.stats.setFinishedQueue(finishedQueue.toLinkedList());
+                
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
             } 
@@ -231,6 +239,10 @@ public class CPU {
                 log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
 
                 currentProcess.setFinishTime((int) simulationTime); //
+                
+                finishedQueue.enqueue(currentProcess);
+                this.stats.setFinishedQueue(finishedQueue.toLinkedList());
+                
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;  // el próximo ciclo selecciona otro y resetea quantum
             }
@@ -330,6 +342,10 @@ public class CPU {
             } else if (currentProcess.isFinished()) {
                 log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
                 currentProcess.setFinishTime((int) simulationTime);
+                
+                finishedQueue.enqueue(currentProcess);
+                this.stats.setFinishedQueue(finishedQueue.toLinkedList());
+                
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
             }
@@ -395,6 +411,10 @@ public class CPU {
             } else if (currentProcess.isFinished()) {
                 log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
                 currentProcess.setFinishTime((int) simulationTime);
+                
+                finishedQueue.enqueue(currentProcess);
+                this.stats.setFinishedQueue(finishedQueue.toLinkedList());
+                
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
             }

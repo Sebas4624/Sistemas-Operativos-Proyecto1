@@ -36,6 +36,14 @@ public class MainView extends javax.swing.JFrame {
         
         this.starter = new Thread(() -> {
             sim.startSimulation();
+            
+            this.startButton.setEnabled(true);
+            this.pauseButton.setEnabled(false);
+            this.configButton.setEnabled(true);
+            this.createButton.setEnabled(true);
+            this.planPolicySelector.setEnabled(true);
+            this.configView.setVisible(false);
+            this.createView.setVisible(false);
         }, "Starter-Thread");
         
         forceUpdateFields();
@@ -98,6 +106,9 @@ public class MainView extends javax.swing.JFrame {
         startButton = new javax.swing.JButton();
         planPolicySelector = new javax.swing.JComboBox<>();
         pauseButton = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        FinishedList = new javax.swing.JList<>();
+        jLabel3 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         configButton = new javax.swing.JMenu();
         createButton = new javax.swing.JMenu();
@@ -712,6 +723,17 @@ public class MainView extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
+        FinishedList.setBackground(new java.awt.Color(34, 34, 34));
+        FinishedList.setBorder(null);
+        FinishedList.setForeground(new java.awt.Color(255, 255, 255));
+        jScrollPane3.setViewportView(FinishedList);
+
+        jLabel3.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel3.setText("Cola \"TERMINADO\"");
+        jLabel3.setToolTipText("");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -720,15 +742,18 @@ public class MainView extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -736,13 +761,19 @@ public class MainView extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
+                            .addComponent(jScrollPane2)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane3)))
                 .addGap(8, 8, 8)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -821,10 +852,6 @@ public class MainView extends javax.swing.JFrame {
     }//GEN-LAST:event_fairnessFieldActionPerformed
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_startButtonActionPerformed
-
-    private void startButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_startButtonMousePressed
         starter.start();
         
         this.startButton.setEnabled(false);
@@ -832,6 +859,10 @@ public class MainView extends javax.swing.JFrame {
         this.configButton.setEnabled(false);
         this.createButton.setEnabled(false);
         this.planPolicySelector.setEnabled(false);
+    }//GEN-LAST:event_startButtonActionPerformed
+
+    private void startButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_startButtonMousePressed
+        // TODO add your handling code here:
     }//GEN-LAST:event_startButtonMousePressed
 
     private void currentProcessIDFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currentProcessIDFieldActionPerformed
@@ -863,10 +894,6 @@ public class MainView extends javax.swing.JFrame {
     }//GEN-LAST:event_planPolicySelectorActionPerformed
 
     private void pauseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pauseButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_pauseButtonActionPerformed
-
-    private void pauseButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pauseButtonMousePressed
         starter.interrupt();
         
         this.startButton.setEnabled(true);
@@ -874,16 +901,20 @@ public class MainView extends javax.swing.JFrame {
         this.configButton.setEnabled(true);
         this.createButton.setEnabled(true);
         this.planPolicySelector.setEnabled(true);
+    }//GEN-LAST:event_pauseButtonActionPerformed
+
+    private void pauseButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pauseButtonMousePressed
+        // TODO add your handling code here:
     }//GEN-LAST:event_pauseButtonMousePressed
 
     private void configButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configButtonMousePressed
         // TODO add your handling code here:
-        configView.setVisible(true);
+        if(this.configButton.isEnabled()) configView.setVisible(true);
     }//GEN-LAST:event_configButtonMousePressed
 
     private void createButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_createButtonMousePressed
         // TODO add your handling code here:
-        createView.setVisible(true);
+        if(this.createButton.isEnabled()) createView.setVisible(true);
     }//GEN-LAST:event_createButtonMousePressed
 
     private void cycleFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cycleFieldActionPerformed
@@ -907,6 +938,7 @@ public class MainView extends javax.swing.JFrame {
                     String newCurrentField = this.stats.isCurrentProcessAvailable() ? this.stats.currentProcess.name() : "Ninguno";
                     String[] newReadyList = this.stats.getReadyQueueList();
                     String[] newIoList = this.stats.getIoQueueList();
+                    String[] newfinishedList = this.stats.getFinishedQueueList();
                     
                     String newId = this.stats.isCurrentProcessAvailable() ? this.stats.currentProcess.id() : "Ninguno";
                     String newName = this.stats.isCurrentProcessAvailable() ? this.stats.currentProcess.name() : "Ninguno";
@@ -928,6 +960,7 @@ public class MainView extends javax.swing.JFrame {
                     this.currentProcessField.setText(newCurrentField);
                     this.ReadyList.setListData(newReadyList);
                     this.BlockedList.setListData(newIoList);
+                    this.FinishedList.setListData(newfinishedList);
                     
                     this.currentProcessIDField.setText(newId);
                     this.currentProcessNameField.setText(newName);
@@ -956,6 +989,7 @@ public class MainView extends javax.swing.JFrame {
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> BlockedList;
+    private javax.swing.JList<String> FinishedList;
     private javax.swing.JList<String> ReadyList;
     private javax.swing.JTextField avgRespField;
     private javax.swing.JTextField avgTurnField;
@@ -985,6 +1019,7 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -1001,6 +1036,7 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JButton pauseButton;
     private javax.swing.JComboBox<String> planPolicySelector;
     private javax.swing.JButton startButton;

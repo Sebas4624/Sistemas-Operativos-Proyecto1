@@ -20,6 +20,7 @@ public class Stats {
     public Process currentProcess;
     public LinkedList<Process> readyQueue;
     public LinkedList<Process> ioQueue;
+    public LinkedList<Process> finishedQueue;
     
     public long currentCycle;
     
@@ -36,6 +37,7 @@ public class Stats {
         this.currentProcess = null;
         this.readyQueue = new LinkedList();
         this.ioQueue = new LinkedList();
+        this.finishedQueue = new LinkedList();
         
         this.currentCycle = 0;
     }
@@ -59,6 +61,7 @@ public class Stats {
     
     public void setReadyQueue(LinkedList<Process> q) { readyQueue = q; }
     public void setIoQueue(LinkedList<Process> q) { ioQueue = q; }
+    public void setFinishedQueue(LinkedList<Process> q) { finishedQueue = q; }
     
     public String[] getReadyQueueList() {
         String[] res = new String[readyQueue.size()];
@@ -74,6 +77,15 @@ public class Stats {
         
         for(int i = 0; i < res.length; i++) { 
             res[i] = ioQueue.get(i).name();
+        }
+        
+        return res;
+    }
+    public String[] getFinishedQueueList() {
+        String[] res = new String[finishedQueue.size()];
+        
+        for(int i = 0; i < res.length; i++) { 
+            res[i] = finishedQueue.get(i).name();
         }
         
         return res;

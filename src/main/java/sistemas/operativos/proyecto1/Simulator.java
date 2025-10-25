@@ -1,5 +1,6 @@
 package sistemas.operativos.proyecto1;
 
+import sistemas.operativos.proyecto1.process.Process;
 import sistemas.operativos.proyecto1.process.ProcessType;
 import sistemas.operativos.proyecto1.sched.Scheduler;
 
@@ -8,29 +9,38 @@ import sistemas.operativos.proyecto1.sched.Scheduler;
  * @author Sebastián
  */
 public class Simulator {
-    private Config config;
-    private CPU cpu = new CPU(config);
+    private final Config config;
+    private final CPU cpu;
+    private final Stats stats;
     private Thread cpuThread, ioThread;
     private volatile boolean running = false;
     /**
      * Constructor.
+     * @param stats
      */
-    public Simulator() {
+    public Simulator(Stats stats) {
         this.config = new Config(100);
-        this.cpu = new CPU(config);
+        this.cpu = new CPU(config, stats);
+        this.stats = stats;
     }
     
     /**
      * Constructor.
+     * @param stats
      * @param config Configuración del simulador.
      */
-    public Simulator(Config config) {
+    public Simulator(Stats stats, Config config) {
         this.config = config;
-        this.cpu = new CPU(config);
+        this.cpu = new CPU(config, stats);
+        this.stats = stats;
     }
     
     public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
         cpu.setScheduler(s);
+    }
+    
+    public void resetState() {
+        
     }
 
     /**
@@ -42,32 +52,55 @@ public class Simulator {
             case PlanPolicy.FCFS -> {
                 System.out.println("First-Come, First-Served");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        cpu.pauseCPU();
+                        return;
+                    }
+                    
+                    stats.setCurrentCycle();
                     cpu.simulateCycleFCFS();
-                    System.out.print("Ciclo: ");  
-                    System.out.println(i);  
+                    updateReport();
+                    if(cpu.isActive()) return;
                 }
             }
             case RR -> {
                 System.out.println("Round Robin");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        cpu.pauseCPU();
+                        return;
+                    }
+                    
+                    stats.setCurrentCycle();
                     cpu.simulateCycleRR();
-                    System.out.print("Ciclo: ");  
-                    System.out.println(i);  
+                    if(cpu.isActive()) return;
                 }
             }
             case SRTF -> {
                 System.out.println("Shortest Remaining Time First");
                 for (int i = 1; i <= config.getCyclesAmount(); i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        cpu.pauseCPU();
+                        return;
+                    }
+                    
+                    stats.setCurrentCycle();
                     cpu.simulateCycleSRTF();
+                    if(cpu.isActive()) return;
                 }
             }
 
             case PRI -> {
                 System.out.println("Cola por prioridad");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        cpu.pauseCPU();
+                        return;
+                    }
+                    
+                    stats.setCurrentCycle();
                     cpu.simulateCyclePRI();
-                    System.out.print("Ciclo: ");  
-                    System.out.println(i);  
+                    if(cpu.isActive()) return;
                 }
             }
             case MFQ -> {
@@ -169,6 +202,87 @@ public class Simulator {
         System.out.printf("Throughput (proc/ciclo): %.4f%n", throughput);
         System.out.printf("Fairness (Jain sobre WAIT): %.3f%n", fairness);
         System.out.println("====================\n");
+        
+        stats.setTotalProcesses(n);
+        stats.setCompletedProcesses(completed);
+        stats.setAvgWait(avgWait);
+        stats.setAvgResp(avgResp);
+        stats.setAvgTurn(avgTurn);
+        stats.setUtil(util);
+        stats.setThroughput(throughput);
+        stats.setFairness(fairness);
+        
+        stats.setCurrentProcess(this.cpu.getCurrentProcess());
+    }
+    
+    public void updateReport() {
+        var procs = cpu.getAllProcesses();
+        int n = procs.size();
+        if (n == 0) {
+            System.out.println("No hay procesos para reportar.");
+            return;
+        }
+
+        long completed = 0;
+        long sumWait = 0;
+        long sumResp = 0;
+        long sumTurn = 0;
+        
+        int  respCount = 0;
+        int turnCount = 0;
+
+        // Para “equidad” (fairness), usaremos Jain sobre el tiempo de espera:
+        // J = ( (Σw)^2 ) / ( n * Σ(w^2) ),  0< J ≤ 1 (1 es perfectamente justo)
+        double sumW = 0.0;
+        double sumW2 = 0.0;
+
+        for (var p : procs) {
+            Integer start  = p.firstRun();
+            Integer finish = p.finishTime();
+            long wait      = p.totalWait();                   // ya lo acumulas con onEnqueuedReady/onDispatchedToCpu
+            Integer arr    = p.arrival();
+
+            Integer resp   = (start == null || arr == null)  ? null : (start - arr);
+            Integer turn   = (finish == null || arr == null) ? null : (finish - arr);
+
+            if (finish != null) completed++;
+
+            sumWait += wait;
+             if (resp != null) { sumResp += resp; respCount++; }
+             if (turn != null) { sumTurn += turn; turnCount++; }
+             
+            sumW  += wait;
+            sumW2 += ((double)wait)*wait;
+        }
+
+        // Promedios (se calculan sobre los que tienen valor)
+        double avgWait = n == 0 ? 0 : (double) sumWait / n;
+        double avgResp = n == 0 ? 0 : (double) sumResp / respCount;
+        double avgTurn = n == 0 ? 0 : (double) sumTurn / turnCount;
+
+        // Utilización de CPU
+        long busy = cpu.getBusyCycles();
+        long totalCycles = config.getCyclesAmount();
+        double util = totalCycles == 0 ? 0 : (100.0 * busy / totalCycles);
+
+        // Throughput = procesos completados / tiempo total simulado (en ciclos)
+        double throughput = totalCycles == 0 ? 0 : ((double) completed / totalCycles);
+
+        // Fairness (Jain) sobre los tiempos de espera
+        double fairness  = (n == 0 || sumW2 == 0.0) ? 1.0 : ((sumW * sumW) / (n * sumW2));
+        
+        stats.setTotalProcesses(n);
+        stats.setCompletedProcesses(completed);
+        stats.setAvgWait(avgWait);
+        stats.setAvgResp(avgResp);
+        stats.setAvgTurn(avgTurn);
+        stats.setUtil(util);
+        stats.setThroughput(throughput);
+        stats.setFairness(fairness);
+        
+        stats.setCurrentProcess(this.cpu.getCurrentProcess());
+        stats.setReadyQueue(this.cpu.getReadyQueue());
+        stats.setIoQueue(this.cpu.getIoQueue());
     }
     
     private void dumpLogToFile() {
@@ -220,5 +334,17 @@ public class Simulator {
         cpu.enableExternalIOThread(false);
         printReport();
         dumpLogToFile();
+    }
+    
+    public long getCyclesDuration() { return config.getCycleDuration(); }
+    public int getCyclesAmount() { return config.getCyclesAmount(); }
+    public int getCyclesQuantum() { return config.getQuantum(); }
+    
+    public void setCyclesDuration(long n) { this.config.setCycleDuration(n); }
+    public void setCyclesAmount(int n) { this.config.setCyclesAmount(n); }
+    public void setCyclesQuantum(int n) { this.config.setQuantum(n); }
+    
+    public void updateReadyQueue() {
+        stats.setReadyQueue(this.cpu.getReadyQueue());
     }
 }

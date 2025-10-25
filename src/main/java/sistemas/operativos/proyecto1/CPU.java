@@ -1,8 +1,7 @@
 package sistemas.operativos.proyecto1;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import sistemas.operativos.proyecto1.lib.Queue;
+import sistemas.operativos.proyecto1.lib.LinkedList;
 import sistemas.operativos.proyecto1.lib.PriorityQueue;
 import sistemas.operativos.proyecto1.process.Process;
 import sistemas.operativos.proyecto1.process.ProcessType;
@@ -19,8 +18,10 @@ public class CPU {
     private final Queue<Process> readyQueue;
     private final PriorityQueue<Process> readyPriorityQueue;
     private final Queue<Process> ioQueue;
+    private final Queue<Process> finishedQueue;
     private Process currentProcess;
     private final Config config;
+    private final Stats stats;
     private long simulationTime;
     private long busyCycles = 0;    
     private sistemas.operativos.proyecto1.sched.Scheduler scheduler;
@@ -59,15 +60,33 @@ public class CPU {
     /**
      * Constructor.
      * @param config Configuración del simulador. 
+     * @param stats 
      */
-    public CPU(Config config) {
+    public CPU(Config config, Stats stats) {
         this.readyQueue = new Queue();
         this.readyPriorityQueue = new PriorityQueue();
         this.ioQueue = new Queue();
+        this.finishedQueue = new Queue();
         this.config = config;
+        this.stats = stats;
         this.simulationTime = 0;
     }
     
+    public void pauseCPU() {
+        /*
+        try {
+            for(int i = 0; i < ioQueue.size(); i++) {
+                Process p = ioQueue.dequeue();
+                readyQueue.enqueue(p);
+            }
+        } catch (Exception e) {
+        }
+        */
+    }
+    
+    public void resetCPUState() {
+        
+    }
     
     /**
      * Crea un proceso y lo pone en la cola de listos.
@@ -178,8 +197,12 @@ public class CPU {
                 
             } else if (currentProcess.isFinished()) {
                 log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
-
+                
                 currentProcess.setFinishTime((int) simulationTime);   //guarda fin
+                
+                finishedQueue.enqueue(currentProcess);
+                this.stats.setFinishedQueue(finishedQueue.toLinkedList());
+                
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
             } 
@@ -232,6 +255,10 @@ public class CPU {
                 log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
 
                 currentProcess.setFinishTime((int) simulationTime); //
+                
+                finishedQueue.enqueue(currentProcess);
+                this.stats.setFinishedQueue(finishedQueue.toLinkedList());
+                
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;  // el próximo ciclo selecciona otro y resetea quantum
             }
@@ -331,6 +358,10 @@ public class CPU {
             } else if (currentProcess.isFinished()) {
                 log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
                 currentProcess.setFinishTime((int) simulationTime);
+                
+                finishedQueue.enqueue(currentProcess);
+                this.stats.setFinishedQueue(finishedQueue.toLinkedList());
+                
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
             }
@@ -396,6 +427,10 @@ public class CPU {
             } else if (currentProcess.isFinished()) {
                 log("FIN %s (t=%d)", currentProcess.name(), simulationTime);
                 currentProcess.setFinishTime((int) simulationTime);
+                
+                finishedQueue.enqueue(currentProcess);
+                this.stats.setFinishedQueue(finishedQueue.toLinkedList());
+                
                 System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
                 currentProcess = null;
             }
@@ -498,7 +533,6 @@ public class CPU {
             cpuMutex.release();
         }
     }
-
    
     private void processIOPriorityQueue() {
         int n = ioQueue.size();
@@ -514,5 +548,20 @@ public class CPU {
             }
         }
     }
+    
+    public boolean isActive() {
+        return readyQueue.isEmpty() && ioQueue.isEmpty() && readyPriorityQueue.isEmpty() && currentProcess == null;
+    }
 
+    public Process getCurrentProcess() {
+        return this.currentProcess;
+    }
+
+    public LinkedList<Process> getReadyQueue() {
+        return this.readyQueue.toLinkedList();
+    }
+
+    public LinkedList<Process> getIoQueue() {
+        return this.ioQueue.toLinkedList();
+    }
 }

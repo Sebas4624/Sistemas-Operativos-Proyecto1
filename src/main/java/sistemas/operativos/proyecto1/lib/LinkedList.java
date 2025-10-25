@@ -111,6 +111,12 @@ public class LinkedList<T> implements Iterable<T> {
         if (index < 0 || index >= size) throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
     }
 
+    public void clear() {
+        this.head = null;
+        this.tail = null;
+        this.size = 0;    
+    }
+
     @Override
     public java.util.Iterator<T> iterator() {
         return new java.util.Iterator<T>() {

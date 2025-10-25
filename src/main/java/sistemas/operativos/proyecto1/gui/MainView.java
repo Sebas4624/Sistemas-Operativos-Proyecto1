@@ -21,14 +21,23 @@ public class MainView extends javax.swing.JFrame {
     private boolean running;
     private JFrame configView;
     private JFrame createView;
+    
+    // --- componentes agregados manualmente ---
+    private javax.swing.JTextArea logArea = new javax.swing.JTextArea();
+    private javax.swing.JScrollPane logScroll = new javax.swing.JScrollPane();
+
 
     /**
      * Creates new form MainView
      * @param sim
      * @param stats
      */
+    
     public MainView(Simulator sim, Stats stats) {
+        
         initComponents();
+        afterInit();
+        
         this.sim = sim;
         this.stats = stats;
         
@@ -52,6 +61,40 @@ public class MainView extends javax.swing.JFrame {
         
         forceUpdateFields();
         updateFields();
+    }
+
+    private void afterInit() {
+        logArea.setEditable(false);
+        logArea.setLineWrap(true);
+        logArea.setWrapStyleWord(true);
+        logArea.setBackground(new java.awt.Color(24,24,24));
+        logArea.setForeground(java.awt.Color.WHITE);
+        logArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
+        logScroll.setViewportView(logArea);
+
+        // Añadir al jPanel4 y actualizar el GroupLayout
+        jPanel4.add(logScroll);
+
+        // Ajuste del GroupLayout para colocar logScroll entre jPanel5 y jPanel6:
+        javax.swing.GroupLayout jPanel4Layout = (javax.swing.GroupLayout) jPanel4.getLayout();
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(logScroll) // ocupar todo el ancho
+                .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel4Layout.createSequentialGroup()
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(logScroll, 0, 120, Short.MAX_VALUE) // <- altura del área de log
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
     }
 
     /**
@@ -1005,6 +1048,15 @@ public class MainView extends javax.swing.JFrame {
                     this.currentProcessMARField.setText(newMAR);
                     
                     this.cycleField.setText(newCurrentCycle);
+
+                    this.currentProcessMARField.setText(newMAR);
+                    this.cycleField.setText(newCurrentCycle);
+                    // LOG DE EVENTOS 
+                    String[] logLines = sim.getEventLogArray();
+                    String logText = String.join(System.lineSeparator(), logLines);
+                    this.logArea.setText(logText);
+                    this.logArea.setCaretPosition(this.logArea.getDocument().getLength());
+
                 } catch (InterruptedException e) {
                      Thread.currentThread().interrupt();
                 }
@@ -1020,6 +1072,8 @@ public class MainView extends javax.swing.JFrame {
         String[] newReadyList = this.stats.getReadyQueueList();
         
         this.ReadyList.setListData(newReadyList);
+        this.logArea.setText(String.join(System.lineSeparator(), sim.getEventLogArray()));
+
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

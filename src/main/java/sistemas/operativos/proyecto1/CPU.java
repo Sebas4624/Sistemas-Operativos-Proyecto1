@@ -54,6 +54,10 @@ public class CPU {
         eventLog.add(line);
     }
     
+    public void clearEventLog() { 
+        eventLog.clear(); 
+    }
+    
     public String[] getEventLogArray() {
         int n = eventLog.size();
         String[] arr = new String[n];

@@ -44,12 +44,17 @@ public class Simulator {
     public void resetState() {
         
     }
+    
+    public String[] getEventLogArray() {
+        return cpu.getEventLogArray();   // delega al CPU
+    }
 
     /**
      * Inicia la simulación, ejecutando la función de ejecución de ciclo
      * adecuada, dependiendo de la política de planificación actual.
      */
     public void startSimulation() {
+        cpu.clearEventLog(); 
         switch(config.getPolicy()) {
             case PlanPolicy.FCFS -> {
                 System.out.println("First-Come, First-Served");  
@@ -263,17 +268,14 @@ public class Simulator {
             sumW2 += ((double)wait)*wait;
         }
 
-        // Promedios (se calculan sobre los que tienen valor)
         double avgWait = n == 0 ? 0 : (double) sumWait / n;
         double avgResp = n == 0 ? 0 : (double) sumResp / respCount;
         double avgTurn = n == 0 ? 0 : (double) sumTurn / turnCount;
 
-        // Utilización de CPU
         long busy = cpu.getBusyCycles();
         long totalCycles = config.getCyclesAmount();
         double util = totalCycles == 0 ? 0 : (100.0 * busy / totalCycles);
 
-        // Throughput = procesos completados / tiempo total simulado (en ciclos)
         double throughput = totalCycles == 0 ? 0 : ((double) completed / totalCycles);
 
         // Fairness (Jain) sobre los tiempos de espera

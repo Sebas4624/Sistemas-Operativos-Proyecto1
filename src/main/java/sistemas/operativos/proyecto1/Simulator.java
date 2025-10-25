@@ -52,6 +52,7 @@ public class Simulator {
                         return;
                     }
                     
+                    stats.setCurrentCycle(i);
                     cpu.simulateCycleFCFS();
                     updateReport();
                 }
@@ -63,6 +64,7 @@ public class Simulator {
                         return;
                     }
                     
+                    stats.setCurrentCycle(i);
                     cpu.simulateCycleRR();
                 }
             }
@@ -73,6 +75,7 @@ public class Simulator {
                         return;
                     }
                     
+                    stats.setCurrentCycle(i);
                     cpu.simulateCycleSRTF();
                 }
             }
@@ -84,6 +87,7 @@ public class Simulator {
                         return;
                     }
                     
+                    stats.setCurrentCycle(i);
                     cpu.simulateCyclePRI();
                 }
             }

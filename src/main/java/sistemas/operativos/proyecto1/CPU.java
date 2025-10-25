@@ -497,7 +497,6 @@ public class CPU {
             cpuMutex.release();
         }
     }
-
    
     private void processIOPriorityQueue() {
         int n = ioQueue.size();

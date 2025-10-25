@@ -78,6 +78,8 @@ public class MainView extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         currentProcessField = new javax.swing.JTextField();
+        cycleField = new javax.swing.JTextField();
+        jLabel19 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
@@ -368,6 +370,26 @@ public class MainView extends javax.swing.JFrame {
             }
         });
 
+        cycleField.setBackground(new java.awt.Color(24, 24, 24));
+        cycleField.setForeground(new java.awt.Color(255, 255, 255));
+        cycleField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        cycleField.setText("0");
+        cycleField.setBorder(null);
+        cycleField.setCaretColor(new java.awt.Color(255, 255, 255));
+        cycleField.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        cycleField.setEnabled(false);
+        cycleField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cycleFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel19.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel19.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel19.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel19.setText("Ciclo:");
+        jLabel19.setToolTipText("");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -376,8 +398,12 @@ public class MainView extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(currentProcessField, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(151, Short.MAX_VALUE))
+                .addComponent(currentProcessField, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
+                .addComponent(jLabel19)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cycleField, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -385,8 +411,11 @@ public class MainView extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(currentProcessField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel4)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(cycleField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel19)))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
 
         jPanel5.setBackground(new java.awt.Color(51, 51, 51));
@@ -857,6 +886,10 @@ public class MainView extends javax.swing.JFrame {
         createView.setVisible(true);
     }//GEN-LAST:event_createButtonMousePressed
 
+    private void cycleFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cycleFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cycleFieldActionPerformed
+
     public void updateFields() {
         Thread updater = new Thread(() -> {
             while(true) {
@@ -881,6 +914,8 @@ public class MainView extends javax.swing.JFrame {
                     String newPriority = this.stats.isCurrentProcessAvailable() ? String.valueOf(this.stats.currentProcess.priority()) : "0";
                     String newPC = this.stats.isCurrentProcessAvailable() ? String.valueOf(this.stats.currentProcess.pc()) : "0";
                     String newMAR = this.stats.isCurrentProcessAvailable() ? String.valueOf(this.stats.currentProcess.mar()) : "0";
+                    
+                    String newCurrentCycle = String.valueOf(this.stats.currentCycle);
 
                     this.completedProcessesField.setText(newCompletedProcessesField);
                     this.avgWaitField.setText(newAvgWaitField);
@@ -900,6 +935,8 @@ public class MainView extends javax.swing.JFrame {
                     this.currentProcessPriorityField.setText(newPriority);
                     this.currentProcessPCField.setText(newPC);
                     this.currentProcessMARField.setText(newMAR);
+                    
+                    this.cycleField.setText(newCurrentCycle);
                 } catch (InterruptedException e) {
                      Thread.currentThread().interrupt();
                 }
@@ -934,6 +971,7 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JTextField currentProcessNameField;
     private javax.swing.JTextField currentProcessPCField;
     private javax.swing.JTextField currentProcessPriorityField;
+    private javax.swing.JTextField cycleField;
     private javax.swing.JTextField fairnessField;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -945,6 +983,7 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;

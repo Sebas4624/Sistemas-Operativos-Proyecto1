@@ -1,6 +1,5 @@
 package sistemas.operativos.proyecto1;
 
-import sistemas.operativos.proyecto1.lib.Queue;
 import sistemas.operativos.proyecto1.lib.LinkedList;
 import sistemas.operativos.proyecto1.process.Process;
 
@@ -22,6 +21,8 @@ public class Stats {
     public LinkedList<Process> readyQueue;
     public LinkedList<Process> ioQueue;
     
+    public long currentCycle;
+    
     public Stats() {
         this.totalProcesses = 0;
         this.completedProcesses = 0;
@@ -35,6 +36,8 @@ public class Stats {
         this.currentProcess = null;
         this.readyQueue = new LinkedList();
         this.ioQueue = new LinkedList();
+        
+        this.currentCycle = 0;
     }
     
     public void setTotalProcesses(long total) { totalProcesses = total; }
@@ -45,6 +48,7 @@ public class Stats {
     public void setUtil(double per) { util = per; }
     public void setThroughput(double through) { throughput = through; }
     public void setFairness(double fair) { fairness = fair; }
+    public void setCurrentCycle(long c) { currentCycle = c; }
     
     public boolean isCurrentProcessAvailable() {
         return this.currentProcess != null;

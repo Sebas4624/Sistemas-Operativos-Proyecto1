@@ -13,16 +13,19 @@ public class CreateView extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(CreateView.class.getName());
     private final Simulator sim;
     private final Stats stats;
+    private final MainView parent;
 
     /**
      * Creates new form CreateView
      * @param sim
      * @param stats
+     * @param parent
      */
-    public CreateView(Simulator sim, Stats stats) {
+    public CreateView(Simulator sim, Stats stats, MainView parent) {
         initComponents();
         this.sim = sim;
         this.stats = stats;
+        this.parent = parent;
     }
 
     /**
@@ -344,8 +347,6 @@ public class CreateView extends javax.swing.JFrame {
 
     private void confirmButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_confirmButtonMousePressed
         this.createProcess();
-
-        this.setVisible(false);
     }//GEN-LAST:event_confirmButtonMousePressed
 
     private void confirmButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_confirmButtonActionPerformed
@@ -434,6 +435,10 @@ public class CreateView extends javax.swing.JFrame {
             validate
             ) {
             this.sim.createProcess(name, arrivalParsed, instructionsParsed, typeParsed, exceptionParsed, satisfyParsed, priorityParsed);
+            
+            this.parent.forceUpdateFields();
+            
+            this.setVisible(false);
         }
     }
 

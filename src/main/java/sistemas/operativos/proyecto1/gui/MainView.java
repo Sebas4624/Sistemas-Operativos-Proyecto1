@@ -32,12 +32,13 @@ public class MainView extends javax.swing.JFrame {
         this.stats = stats;
         
         this.configView = new ConfigView(sim, stats);
-        this.createView = new CreateView(sim, stats);
+        this.createView = new CreateView(sim, stats, this);
         
         this.starter = new Thread(() -> {
             sim.startSimulation();
         }, "Starter-Thread");
         
+        forceUpdateFields();
         updateFields();
     }
 
@@ -799,6 +800,9 @@ public class MainView extends javax.swing.JFrame {
         
         this.startButton.setEnabled(false);
         this.pauseButton.setEnabled(true);
+        this.configButton.setEnabled(false);
+        this.createButton.setEnabled(false);
+        this.planPolicySelector.setEnabled(false);
     }//GEN-LAST:event_startButtonMousePressed
 
     private void currentProcessIDFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_currentProcessIDFieldActionPerformed
@@ -838,6 +842,9 @@ public class MainView extends javax.swing.JFrame {
         
         this.startButton.setEnabled(true);
         this.pauseButton.setEnabled(false);
+        this.configButton.setEnabled(true);
+        this.createButton.setEnabled(true);
+        this.planPolicySelector.setEnabled(true);
     }//GEN-LAST:event_pauseButtonMousePressed
 
     private void configButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configButtonMousePressed
@@ -850,32 +857,6 @@ public class MainView extends javax.swing.JFrame {
         createView.setVisible(true);
     }//GEN-LAST:event_createButtonMousePressed
 
-    /**
-     * @param args the command line arguments
-     */
-    
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        //java.awt.EventQueue.invokeLater(() -> new MainView().setVisible(true));
-    }
-    
     public void updateFields() {
         Thread updater = new Thread(() -> {
             while(true) {
@@ -928,6 +909,14 @@ public class MainView extends javax.swing.JFrame {
         updater.start();
     }
 
+    public void forceUpdateFields() {
+        this.sim.updateReadyQueue();
+        
+        String[] newReadyList = this.stats.getReadyQueueList();
+        
+        this.ReadyList.setListData(newReadyList);
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> BlockedList;
     private javax.swing.JList<String> ReadyList;

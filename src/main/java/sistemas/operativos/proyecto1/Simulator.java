@@ -327,4 +327,8 @@ public class Simulator {
     public void setCyclesDuration(long n) { this.config.setCycleDuration(n); }
     public void setCyclesAmount(int n) { this.config.setCyclesAmount(n); }
     public void setCyclesQuantum(int n) { this.config.setQuantum(n); }
+    
+    public void updateReadyQueue() {
+        stats.setReadyQueue(this.cpu.getReadyQueue());
+    }
 }

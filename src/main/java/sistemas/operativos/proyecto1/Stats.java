@@ -50,6 +50,7 @@ public class Stats {
     public void setUtil(double per) { util = per; }
     public void setThroughput(double through) { throughput = through; }
     public void setFairness(double fair) { fairness = fair; }
+    public void setCurrentCycle() { currentCycle++; }
     public void setCurrentCycle(long c) { currentCycle = c; }
     
     public boolean isCurrentProcessAvailable() {

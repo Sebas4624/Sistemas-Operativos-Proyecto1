@@ -38,6 +38,10 @@ public class Simulator {
     public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
         cpu.setScheduler(s);
     }
+    
+    public void resetState() {
+        
+    }
 
     /**
      * Inicia la simulación, ejecutando la función de ejecución de ciclo
@@ -49,34 +53,40 @@ public class Simulator {
                 System.out.println("First-Come, First-Served");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     if(Thread.currentThread().isInterrupted()) {
+                        cpu.pauseCPU();
                         return;
                     }
                     
-                    stats.setCurrentCycle(i);
+                    stats.setCurrentCycle();
                     cpu.simulateCycleFCFS();
                     updateReport();
+                    if(cpu.isActive()) return;
                 }
             }
             case RR -> {
                 System.out.println("Round Robin");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     if(Thread.currentThread().isInterrupted()) {
+                        cpu.pauseCPU();
                         return;
                     }
                     
-                    stats.setCurrentCycle(i);
+                    stats.setCurrentCycle();
                     cpu.simulateCycleRR();
+                    if(cpu.isActive()) return;
                 }
             }
             case SRTF -> {
                 System.out.println("Shortest Remaining Time First");
                 for (int i = 1; i <= config.getCyclesAmount(); i++) {
                     if(Thread.currentThread().isInterrupted()) {
+                        cpu.pauseCPU();
                         return;
                     }
                     
-                    stats.setCurrentCycle(i);
+                    stats.setCurrentCycle();
                     cpu.simulateCycleSRTF();
+                    if(cpu.isActive()) return;
                 }
             }
 
@@ -84,11 +94,13 @@ public class Simulator {
                 System.out.println("Cola por prioridad");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     if(Thread.currentThread().isInterrupted()) {
+                        cpu.pauseCPU();
                         return;
                     }
                     
-                    stats.setCurrentCycle(i);
+                    stats.setCurrentCycle();
                     cpu.simulateCyclePRI();
+                    if(cpu.isActive()) return;
                 }
             }
             case MFQ -> {

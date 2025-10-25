@@ -18,6 +18,7 @@ public class MainView extends javax.swing.JFrame {
     private final Simulator sim;
     private final Stats stats;
     private Thread starter;
+    private boolean running;
     private JFrame configView;
     private JFrame createView;
 
@@ -34,7 +35,9 @@ public class MainView extends javax.swing.JFrame {
         this.configView = new ConfigView(sim, stats);
         this.createView = new CreateView(sim, stats, this);
         
+        this.running = true;
         this.starter = new Thread(() -> {
+            this.running = true;
             sim.startSimulation();
             
             this.startButton.setEnabled(true);
@@ -44,6 +47,7 @@ public class MainView extends javax.swing.JFrame {
             this.planPolicySelector.setEnabled(true);
             this.configView.setVisible(false);
             this.createView.setVisible(false);
+            this.running = false;
         }, "Starter-Thread");
         
         forceUpdateFields();
@@ -852,6 +856,22 @@ public class MainView extends javax.swing.JFrame {
     }//GEN-LAST:event_fairnessFieldActionPerformed
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
+        if(!running) {
+            starter = new Thread(() -> {
+                this.running = true;
+                sim.startSimulation();
+
+                this.startButton.setEnabled(true);
+                this.pauseButton.setEnabled(false);
+                this.configButton.setEnabled(true);
+                this.createButton.setEnabled(true);
+                this.planPolicySelector.setEnabled(true);
+                this.configView.setVisible(false);
+                this.createView.setVisible(false);
+                this.running = false;
+            }, "Starter-Thread");
+        }
+        
         starter.start();
         
         this.startButton.setEnabled(false);
@@ -895,6 +915,20 @@ public class MainView extends javax.swing.JFrame {
 
     private void pauseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pauseButtonActionPerformed
         starter.interrupt();
+        
+        starter = new Thread(() -> {
+            this.running = true;
+            sim.startSimulation();
+            
+            this.startButton.setEnabled(true);
+            this.pauseButton.setEnabled(false);
+            this.configButton.setEnabled(true);
+            this.createButton.setEnabled(true);
+            this.planPolicySelector.setEnabled(true);
+            this.configView.setVisible(false);
+            this.createView.setVisible(false);
+            this.running = false;
+        }, "Starter-Thread");
         
         this.startButton.setEnabled(true);
         this.pauseButton.setEnabled(false);

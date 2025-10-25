@@ -60,6 +60,7 @@ public class CPU {
     /**
      * Constructor.
      * @param config Configuración del simulador. 
+     * @param stats 
      */
     public CPU(Config config, Stats stats) {
         this.readyQueue = new Queue();
@@ -71,6 +72,21 @@ public class CPU {
         this.simulationTime = 0;
     }
     
+    public void pauseCPU() {
+        /*
+        try {
+            for(int i = 0; i < ioQueue.size(); i++) {
+                Process p = ioQueue.dequeue();
+                readyQueue.enqueue(p);
+            }
+        } catch (Exception e) {
+        }
+        */
+    }
+    
+    public void resetCPUState() {
+        
+    }
     
     /**
      * Crea un proceso y lo pone en la cola de listos.
@@ -531,6 +547,10 @@ public class CPU {
                 ioQueue.enqueue(p);                 // aún no termina: regresa al final
             }
         }
+    }
+    
+    public boolean isActive() {
+        return readyQueue.isEmpty() && ioQueue.isEmpty() && readyPriorityQueue.isEmpty() && currentProcess == null;
     }
 
     public Process getCurrentProcess() {

@@ -335,4 +335,6 @@ public class Simulator {
     public void updateReadyQueue() {
         stats.setReadyQueue(this.cpu.getReadyQueue());
     }
+    
+    public Config getConfig() { return this.config; }
 }

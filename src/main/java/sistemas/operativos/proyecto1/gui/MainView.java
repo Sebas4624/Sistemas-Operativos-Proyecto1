@@ -3,6 +3,7 @@ package sistemas.operativos.proyecto1.gui;
 import javax.swing.JFrame;
 import sistemas.operativos.proyecto1.Simulator;
 import sistemas.operativos.proyecto1.Stats;
+import sistemas.operativos.proyecto1.PlanPolicy;
 
 /**
  *
@@ -654,7 +655,7 @@ public class MainView extends javax.swing.JFrame {
 
         planPolicySelector.setBackground(new java.awt.Color(85, 85, 85));
         planPolicySelector.setForeground(new java.awt.Color(255, 255, 255));
-        planPolicySelector.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "FCFS", "RR", "SPN", "STR", "PRI", "MFQ" }));
+        planPolicySelector.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "FCFS", "RR", "SPN", "SRT", "PRI", "MFQ" }));
         planPolicySelector.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 planPolicySelectorActionPerformed(evt);
@@ -933,7 +934,20 @@ public class MainView extends javax.swing.JFrame {
     }//GEN-LAST:event_currentProcessMARFieldActionPerformed
 
     private void planPolicySelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_planPolicySelectorActionPerformed
-        // TODO add your handling code here:
+        String selected = this.planPolicySelector.getSelectedItem().toString();
+        
+        PlanPolicy selection;
+        
+        try {
+            selection = PlanPolicy.valueOf(selected);
+            System.out.println("Selected: " + selected);
+        } catch (Exception e) {
+            selection = PlanPolicy.FCFS;
+            System.out.println("Error: Defaulting to FCFS");
+        }
+        
+        this.sim.getConfig().setPolicy(selection);
+        this.stats.addLog("Algoritmo de planificación puesto como: " + selection.toString());
     }//GEN-LAST:event_planPolicySelectorActionPerformed
 
     private void pauseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pauseButtonActionPerformed

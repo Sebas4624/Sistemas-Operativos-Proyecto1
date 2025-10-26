@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package sistemas.operativos.proyecto1.gui;
 
 import javax.swing.JFrame;
@@ -37,6 +33,8 @@ public class MainView extends javax.swing.JFrame {
         
         this.running = true;
         this.starter = new Thread(() -> {
+            stats.addLog("Simulación iniciada.");
+            
             this.running = true;
             sim.startSimulation();
             
@@ -110,6 +108,9 @@ public class MainView extends javax.swing.JFrame {
         startButton = new javax.swing.JButton();
         planPolicySelector = new javax.swing.JComboBox<>();
         pauseButton = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        LogsList = new javax.swing.JList<>();
+        jLabel20 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         FinishedList = new javax.swing.JList<>();
         jLabel3 = new javax.swing.JLabel();
@@ -424,12 +425,13 @@ public class MainView extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(currentProcessField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(cycleField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel19)))
+                        .addComponent(jLabel19))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(currentProcessField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel4)))
                 .addContainerGap(16, Short.MAX_VALUE))
         );
 
@@ -703,6 +705,17 @@ public class MainView extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
+        LogsList.setBackground(new java.awt.Color(24, 24, 24));
+        LogsList.setBorder(null);
+        LogsList.setForeground(new java.awt.Color(255, 255, 255));
+        jScrollPane4.setViewportView(LogsList);
+
+        jLabel20.setFont(new java.awt.Font("Nirmala UI", 1, 14)); // NOI18N
+        jLabel20.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel20.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel20.setText("Logs");
+        jLabel20.setToolTipText("");
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -712,7 +725,11 @@ public class MainView extends javax.swing.JFrame {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel20)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -722,7 +739,11 @@ public class MainView extends javax.swing.JFrame {
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel20)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -858,6 +879,8 @@ public class MainView extends javax.swing.JFrame {
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
         if(!running) {
             starter = new Thread(() -> {
+                stats.addLog("Simulación iniciada.");
+                
                 this.running = true;
                 sim.startSimulation();
 
@@ -917,6 +940,8 @@ public class MainView extends javax.swing.JFrame {
         starter.interrupt();
         
         starter = new Thread(() -> {
+            stats.addLog("Simulación iniciada.");
+            
             this.running = true;
             sim.startSimulation();
             
@@ -1004,6 +1029,8 @@ public class MainView extends javax.swing.JFrame {
                     this.currentProcessMARField.setText(newMAR);
                     
                     this.cycleField.setText(newCurrentCycle);
+                    
+                    this.updateLogs();
                 } catch (InterruptedException e) {
                      Thread.currentThread().interrupt();
                 }
@@ -1021,9 +1048,18 @@ public class MainView extends javax.swing.JFrame {
         this.ReadyList.setListData(newReadyList);
     }
     
+    public void updateLogs() {
+        String[] newLogsList = this.stats.getLogsList();
+        
+        this.LogsList.setListData(newLogsList);
+        
+        this.LogsList.ensureIndexIsVisible(newLogsList.length - 1);
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> BlockedList;
     private javax.swing.JList<String> FinishedList;
+    private javax.swing.JList<String> LogsList;
     private javax.swing.JList<String> ReadyList;
     private javax.swing.JTextField avgRespField;
     private javax.swing.JTextField avgTurnField;
@@ -1053,6 +1089,7 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1071,6 +1108,7 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JButton pauseButton;
     private javax.swing.JComboBox<String> planPolicySelector;
     private javax.swing.JButton startButton;

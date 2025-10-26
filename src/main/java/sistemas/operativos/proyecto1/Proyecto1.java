@@ -1,7 +1,6 @@
 package sistemas.operativos.proyecto1;
 
 import sistemas.operativos.proyecto1.process.ProcessType;
-import sistemas.operativos.proyecto1.sched.*;
 import sistemas.operativos.proyecto1.gui.*;
 
 import javax.swing.JFrame;
@@ -16,20 +15,12 @@ public class Proyecto1 {
     public static void main(String[] args) {
         Stats stats = new Stats();
         Config config = new Config(2000, 100, PlanPolicy.FCFS, 20);
-        //Config config = new Config(200, 100, PlanPolicy.RR, 20);
-        //Config config = new Config(200, 100, PlanPolicy.PRI, 20);
-       
         Simulator sim = new Simulator(stats, config);
 
         JFrame simulatorView = new MainView(sim, stats);
         simulatorView.setVisible(true);
         
-        //sim.setScheduler(new FCFS());   
-        //sim.setScheduler(new RR(config));   
-        //sim.setScheduler(new PRI());
-        //sim.setScheduler(new SJF());
-        //sim.setScheduler(new HRRN());
-        //sim.setScheduler(new SRTF());
+        stats.addLog("Programa iniciado.");
 
         // Crear procesos de ejemplo
         // CPU Bound: 20 instrucciones, sin I/O
@@ -64,8 +55,5 @@ public class Proyecto1 {
         
         // CPU Bound: 40 instrucciones, sin I/O
         sim.createProcess("Proceso_CPU_6", 0, 40, ProcessType.CPU_BOUND, 0, 0, 4);
-                
-        // Start Simulation
-        //sim.startSimulation();
     }
 }

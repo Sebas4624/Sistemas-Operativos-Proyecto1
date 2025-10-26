@@ -1,8 +1,6 @@
 package sistemas.operativos.proyecto1;
 
-import sistemas.operativos.proyecto1.process.Process;
 import sistemas.operativos.proyecto1.process.ProcessType;
-import sistemas.operativos.proyecto1.sched.Scheduler;
 
 /**
  * Clase simulador del proyecto.
@@ -53,40 +51,49 @@ public class Simulator {
                 System.out.println("First-Come, First-Served");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     if(Thread.currentThread().isInterrupted()) {
-                        cpu.pauseCPU();
+                        stats.addLog("Simulación pausada.");
                         return;
                     }
                     
                     stats.setCurrentCycle();
                     cpu.simulateCycleFCFS();
                     updateReport();
-                    if(cpu.isActive()) return;
+                    if(cpu.isActive()) {
+                        stats.addLog("Simulación finalizada.");
+                        return;
+                    }
                 }
             }
             case RR -> {
                 System.out.println("Round Robin");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     if(Thread.currentThread().isInterrupted()) {
-                        cpu.pauseCPU();
+                        stats.addLog("Simulación pausada.");
                         return;
                     }
                     
                     stats.setCurrentCycle();
                     cpu.simulateCycleRR();
-                    if(cpu.isActive()) return;
+                    if(cpu.isActive()) {
+                        stats.addLog("Simulación finalizada.");
+                        return;
+                    }
                 }
             }
             case SRTF -> {
                 System.out.println("Shortest Remaining Time First");
                 for (int i = 1; i <= config.getCyclesAmount(); i++) {
                     if(Thread.currentThread().isInterrupted()) {
-                        cpu.pauseCPU();
+                        stats.addLog("Simulación pausada.");
                         return;
                     }
                     
                     stats.setCurrentCycle();
                     cpu.simulateCycleSRTF();
-                    if(cpu.isActive()) return;
+                    if(cpu.isActive()) {
+                        stats.addLog("Simulación finalizada.");
+                        return;
+                    }
                 }
             }
 
@@ -94,13 +101,16 @@ public class Simulator {
                 System.out.println("Cola por prioridad");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
                     if(Thread.currentThread().isInterrupted()) {
-                        cpu.pauseCPU();
+                        stats.addLog("Simulación pausada.");
                         return;
                     }
                     
                     stats.setCurrentCycle();
                     cpu.simulateCyclePRI();
-                    if(cpu.isActive()) return;
+                    if(cpu.isActive()) {
+                        stats.addLog("Simulación finalizada.");
+                        return;
+                    }
                 }
             }
             case MFQ -> {
@@ -307,7 +317,6 @@ public class Simulator {
                     case PlanPolicy.RR   -> cpu.simulateCycleRR();
                     case PlanPolicy.PRI  -> cpu.simulateCyclePRI();
                     case PlanPolicy.SRTF -> cpu.simulateCycleSRTF();
-                    // Si todavía no tienes loop específico:
                     case PlanPolicy.SJF  -> cpu.simulateCycleFCFS();   
                     case PlanPolicy.HRRN -> cpu.simulateCycleFCFS();   
                     default -> throw new AssertionError(config.getPolicy().name());

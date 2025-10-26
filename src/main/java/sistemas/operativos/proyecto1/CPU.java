@@ -29,9 +29,9 @@ public class CPU {
     private final Semaphore ioMutex    = new Semaphore(1, true);
     private final Semaphore cpuMutex   = new Semaphore(1, true);
     
-    private final java.util.List<sistemas.operativos.proyecto1.process.Process> allProcesses = new java.util.ArrayList<>();
+    private final LinkedList<Process> allProcesses = new LinkedList<>();
     
-    public java.util.List<sistemas.operativos.proyecto1.process.Process> getAllProcesses() {
+    public LinkedList<Process> getAllProcesses() {
         return allProcesses;
     }
     
@@ -46,15 +46,20 @@ public class CPU {
     }
     
         //log
-    private final java.util.List<String> eventLog = new java.util.ArrayList<>();
+    private final LinkedList<String> eventLog = new LinkedList();
 
     private void log(String fmt, Object... args) {
         String line = String.format("[%06d] ", simulationTime) + String.format(fmt, args);
         eventLog.add(line);
     }
 
-    public java.util.List<String> getEventLog() {
-        return java.util.Collections.unmodifiableList(eventLog);
+    public String[] getEventLogArray() {
+        int n = eventLog.size();
+        String[] arr = new String[n];
+        for (int i = 0; i < n; i++) {
+            arr[i] = eventLog.get(i);   
+        }
+        return arr;
     }
 
     /**

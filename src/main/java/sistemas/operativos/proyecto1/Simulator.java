@@ -35,10 +35,6 @@ public class Simulator {
         this.stats = stats;
     }
     
-    public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
-        cpu.setScheduler(s);
-    }
-    
     public void resetState() {
         
     }

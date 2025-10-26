@@ -20,8 +20,7 @@ public class CPU {
     private final Config config;
     private final Stats stats;
     private long simulationTime;
-    private long busyCycles = 0;    
-    private sistemas.operativos.proyecto1.sched.Scheduler scheduler;
+    private long busyCycles = 0;
     private final Semaphore readyMutex = new Semaphore(1, true);
     private final Semaphore ioMutex    = new Semaphore(1, true);
     private final Semaphore cpuMutex   = new Semaphore(1, true);
@@ -37,10 +36,6 @@ public class CPU {
     public void enableExternalIOThread(boolean v) { this.externalIOThread = v; }
     
     public long getBusyCycles() { return busyCycles; }
-
-    public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
-        this.scheduler = s;
-    }
     
         //log
     private final LinkedList<String> eventLog = new LinkedList();
@@ -98,8 +93,7 @@ public class CPU {
         readyMutex.acquireUninterruptibly();
 
         try {
-            if (scheduler != null) scheduler.onProcessArrived(process);
-            else readyQueue.enqueue(process);
+            readyQueue.enqueue(process);
         } finally {
             readyMutex.release();
         }
@@ -145,6 +139,7 @@ public class CPU {
                 currentProcess = null;
                 
             } else if (currentProcess.isFinished()) {
+                config.resetRemainingQuantum();
                 currentProcess.setFinishTime((int) simulationTime);   //guarda fin
                 
                 finishedQueue.enqueue(currentProcess);
@@ -156,13 +151,12 @@ public class CPU {
             } 
         
         
-        // 4. Esperar según la duración del ciclo configurada
-        try {
-            Thread.sleep(config.getCycleDuration());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        if (scheduler != null) scheduler.onTick(simulationTime); 
+            // 4. Esperar según la duración del ciclo configurada
+            try {
+                Thread.sleep(config.getCycleDuration());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
     
@@ -218,6 +212,7 @@ public class CPU {
                     currentProcess = null;
 
                 } else if (currentProcess.isFinished()) {
+                    config.resetRemainingQuantum();
                     currentProcess.setFinishTime((int) simulationTime);   //guarda fin
 
                     finishedQueue.enqueue(currentProcess);
@@ -230,13 +225,12 @@ public class CPU {
             }
         
         
-        // 4. Esperar según la duración del ciclo configurada
-        try {
-            Thread.sleep(config.getCycleDuration());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        if (scheduler != null) scheduler.onTick(simulationTime); 
+            // 4. Esperar según la duración del ciclo configurada
+            try {
+                Thread.sleep(config.getCycleDuration());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
     
@@ -280,6 +274,7 @@ public class CPU {
                 currentProcess = null;
                 
             } else if (currentProcess.isFinished()) {
+                config.resetRemainingQuantum();
                 currentProcess.setFinishTime((int) simulationTime);   //guarda fin
                 
                 finishedQueue.enqueue(currentProcess);
@@ -290,14 +285,13 @@ public class CPU {
                 currentProcess = null;
             } 
         
-        
-        // 4. Esperar según la duración del ciclo configurada
-        try {
-            Thread.sleep(config.getCycleDuration());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        if (scheduler != null) scheduler.onTick(simulationTime); 
+
+            // 4. Esperar según la duración del ciclo configurada
+            try {
+                Thread.sleep(config.getCycleDuration());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
     
@@ -342,6 +336,7 @@ public class CPU {
                 currentProcess = null;
                 
             } else if (currentProcess.isFinished()) {
+                config.resetRemainingQuantum();
                 currentProcess.setFinishTime((int) simulationTime);   //guarda fin
                 
                 finishedQueue.enqueue(currentProcess);
@@ -351,15 +346,14 @@ public class CPU {
                 stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha terminado y puesto en la cola de terminados.");
                 currentProcess = null;
             } 
-        
-        
-        // 4. Esperar según la duración del ciclo configurada
-        try {
-            Thread.sleep(config.getCycleDuration());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        if (scheduler != null) scheduler.onTick(simulationTime); 
+
+
+            // 4. Esperar según la duración del ciclo configurada
+            try {
+                Thread.sleep(config.getCycleDuration());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
     
@@ -418,6 +412,7 @@ public class CPU {
                     currentProcess = null;
 
                 } else if (currentProcess.isFinished()) {
+                    config.resetRemainingQuantum();
                     currentProcess.setFinishTime((int) simulationTime);   //guarda fin
 
                     finishedQueue.enqueue(currentProcess);
@@ -428,15 +423,14 @@ public class CPU {
                     currentProcess = null;
                 } 
             }
-        
-        
-        // 4. Esperar según la duración del ciclo configurada
-        try {
-            Thread.sleep(config.getCycleDuration());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        if (scheduler != null) scheduler.onTick(simulationTime); 
+
+
+            // 4. Esperar según la duración del ciclo configurada
+            try {
+                Thread.sleep(config.getCycleDuration());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
     
@@ -459,12 +453,7 @@ public class CPU {
                 p.setReady();
                 p.onEnqueuedReady((int) simulationTime);
                 
-                if (scheduler != null) {
-                    scheduler.onProcessUnblocked(p);
-                }
-                else {
-                    readyQueue.enqueue(p);
-                }                   // vuelve a READY
+                readyQueue.enqueue(p);               // vuelve a READY
                 
                 stats.addLog("I/O compledato para \"" + p.name() + "\".");
                 stats.addLog("Proceso \"" + p.name() + "\" se ha puesto en cola de listos.");
@@ -489,8 +478,7 @@ public class CPU {
                     
                     log("IO-DONE %s -> READY (t=%d)", p.name(), simulationTime);
              
-                    if (scheduler != null) scheduler.onProcessUnblocked(p);
-                    else readyQueue.enqueue(p);
+                    readyQueue.enqueue(p);
                     System.out.println("I/O completado para: " + p.name() + ". Poniendo en cola de listos.");
                 } else {
                     ioQueue.enqueue(p);
@@ -508,9 +496,7 @@ public class CPU {
         cpuMutex.acquireUninterruptibly();
         readyMutex.acquireUninterruptibly();
         try {
-            if (scheduler != null) {
-                currentProcess = scheduler.selectNext();
-            } else if (!readyQueue.isEmpty()) {
+            if (!readyQueue.isEmpty()) {
                 currentProcess = readyQueue.dequeue();
                 stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha puesto en cola de listos.");
             } else {
@@ -538,9 +524,7 @@ public class CPU {
         cpuMutex.acquireUninterruptibly();
         readyMutex.acquireUninterruptibly();
         try {
-            if (scheduler != null) {
-                currentProcess = scheduler.selectNext();
-            } else if (!readyQueue.isEmpty()) {
+            if (!readyQueue.isEmpty()) {
                 currentProcess = readyQueue.pollPriority();
                 stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha puesto en cola de listos.");
             } else {
@@ -568,9 +552,7 @@ public class CPU {
         cpuMutex.acquireUninterruptibly();
         readyMutex.acquireUninterruptibly();
         try {
-            if (scheduler != null) {
-                currentProcess = scheduler.selectNext();
-            } else if (!readyQueue.isEmpty()) {
+            if (!readyQueue.isEmpty()) {
                 currentProcess = readyQueue.pollShortestProcess();
                 stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha puesto en cola de listos.");
             } else {

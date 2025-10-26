@@ -22,6 +22,8 @@ public class ConfigView extends javax.swing.JFrame {
         initComponents();
         this.sim = sim;
         this.stats = stats;
+        
+        loadConfig();
     }
 
     /**

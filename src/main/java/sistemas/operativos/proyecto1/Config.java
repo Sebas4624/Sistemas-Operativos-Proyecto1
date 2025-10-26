@@ -18,11 +18,11 @@ public class Config {
 
     // Constructores
     public Config() {
-        this(100, 100L, PlanPolicy.FCFS, 20);
+        this(1000, 100L, PlanPolicy.FCFS, 50);
     }
 
     public Config(int cyclesAmount) {
-        this(cyclesAmount, 100L, PlanPolicy.FCFS, 20);
+        this(cyclesAmount, 100L, PlanPolicy.FCFS, 50);
     }
 
     public Config(int cyclesAmount, long initialCycleDuration, PlanPolicy policy, int quantum) {

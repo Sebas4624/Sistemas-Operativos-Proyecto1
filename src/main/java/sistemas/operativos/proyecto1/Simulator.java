@@ -76,29 +76,17 @@ public class Simulator {
                     
                     stats.setCurrentCycle();
                     cpu.simulateCycleRR();
+                    updateReport();
                     if(cpu.isActive()) {
                         stats.addLog("Simulación finalizada.");
                         return;
                     }
                 }
             }
-            case SRTF -> {
-                System.out.println("Shortest Remaining Time First");
-                for (int i = 1; i <= config.getCyclesAmount(); i++) {
-                    if(Thread.currentThread().isInterrupted()) {
-                        stats.addLog("Simulación pausada.");
-                        return;
-                    }
-                    
-                    stats.setCurrentCycle();
-                    cpu.simulateCycleSRTF();
-                    if(cpu.isActive()) {
-                        stats.addLog("Simulación finalizada.");
-                        return;
-                    }
-                }
+            case SPN -> {
             }
-
+            case SRT -> {
+            }
             case PRI -> {
                 System.out.println("Cola por prioridad");  
                 for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
@@ -109,6 +97,7 @@ public class Simulator {
                     
                     stats.setCurrentCycle();
                     cpu.simulateCyclePRI();
+                    updateReport();
                     if(cpu.isActive()) {
                         stats.addLog("Simulación finalizada.");
                         return;
@@ -135,10 +124,7 @@ public class Simulator {
      * @param priority Nivel de prioridad del proceso.
      */
     public void createProcess(String name, int arrivalTime, int instructions, ProcessType type, int cyclesForException, int cyclesToSatisfy, int priority) {
-        switch(config.getPolicy()) {
-            case PRI -> cpu.createPriorityProcess(name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
-            default -> cpu.createProcess(name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
-        }
+        cpu.createProcess(name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
     }
     
     public void printReport() {
@@ -171,7 +157,6 @@ public class Simulator {
         double sumW = 0.0;
         double sumW2 = 0.0;
 
-        System.out.println("\n===== REPORTE =====");
         for (int i = 0; i < n; i++) {
             var p = procs.get(i);
             
@@ -191,15 +176,6 @@ public class Simulator {
              
             sumW  += wait;
             sumW2 += ((double) wait) * wait;
-
-            System.out.printf(
-                "%s  arr=%d  start=%s  finish=%s  wait=%d  resp=%s  turn=%s  pc=%d%n",
-                p.name(), arr,
-                String.valueOf(start), String.valueOf(finish),
-                wait,
-                String.valueOf(resp), String.valueOf(turn),
-                p.pc()
-            );
         }
 
         // Promedios (se calculan sobre los que tienen valor)
@@ -217,14 +193,6 @@ public class Simulator {
 
         // Fairness (Jain) sobre los tiempos de espera
         double fairness  = (n == 0 || sumW2 == 0.0) ? 1.0 : ((sumW * sumW) / (n * sumW2));
-
-        System.out.println("----- Agregados -----");
-        System.out.printf("Completados: %d de %d%n", completed, n);
-        System.out.printf("Promedio WAIT: %.2f  | RESP: %.2f  | TURN: %.2f%n", avgWait, avgResp, avgTurn);
-        System.out.printf("CPU Utilization: %.1f%%%n", util);
-        System.out.printf("Throughput (proc/ciclo): %.4f%n", throughput);
-        System.out.printf("Fairness (Jain sobre WAIT): %.3f%n", fairness);
-        System.out.println("====================\n");
         
         stats.setTotalProcesses(n);
         stats.setCompletedProcesses(completed);
@@ -270,7 +238,6 @@ public class Simulator {
         double sumW = 0.0;
         double sumW2 = 0.0;
 
-        System.out.println("\n===== REPORTE =====");
         for (int i = 0; i < n; i++) {
             var p = procs.get(i);
             
@@ -290,15 +257,6 @@ public class Simulator {
              
             sumW  += wait;
             sumW2 += ((double) wait) * wait;
-
-            System.out.printf(
-                "%s  arr=%d  start=%s  finish=%s  wait=%d  resp=%s  turn=%s  pc=%d%n",
-                p.name(), arr,
-                String.valueOf(start), String.valueOf(finish),
-                wait,
-                String.valueOf(resp), String.valueOf(turn),
-                p.pc()
-            );
         }
 
         // Promedios (se calculan sobre los que tienen valor)
@@ -341,37 +299,6 @@ public class Simulator {
             System.err.println("No se pudo escribir events.log: " + e.getMessage());
         }
     }
-
-
-    public void startSimulationAsync() {
-        running = true;
-        cpu.enableExternalIOThread(true);
-
-        cpuThread = new Thread(() -> {
-            while (running) {
-                switch (config.getPolicy()) {
-                    case PlanPolicy.FCFS -> cpu.simulateCycleFCFS();
-                    case PlanPolicy.RR   -> cpu.simulateCycleRR();
-                    case PlanPolicy.PRI  -> cpu.simulateCyclePRI();
-                    case PlanPolicy.SRTF -> cpu.simulateCycleSRTF();
-                    case PlanPolicy.SJF  -> cpu.simulateCycleFCFS();   
-                    case PlanPolicy.HRRN -> cpu.simulateCycleFCFS();   
-                    default -> throw new AssertionError(config.getPolicy().name());
-                }
-            }
-        }, "CPU-Thread");
-
-        ioThread = new Thread(() -> {
-            while (running) {
-                cpu.processIOCycleOneTick();
-                try { Thread.sleep(config.getCycleDuration()); }
-                catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
-            }
-        }, "IO-Thread");
-
-        cpuThread.start();
-        ioThread.start();
-     }
 
     public void stopSimulation() {
         running = false;

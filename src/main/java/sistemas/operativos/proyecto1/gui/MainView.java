@@ -1053,7 +1053,7 @@ public class MainView extends javax.swing.JFrame {
         
         this.LogsList.setListData(newLogsList);
         
-        this.LogsList.ensureIndexIsVisible(newLogsList.length - 1);
+        // this.LogsList.ensureIndexIsVisible(newLogsList.length - 1);
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

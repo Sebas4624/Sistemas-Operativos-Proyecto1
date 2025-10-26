@@ -11,7 +11,4 @@ public enum PlanPolicy {
     SRT, // Shortest Remaining Time
     PRI, // Priority
     MFQ, // Multilevel Feedback Queue
-    SRTF,
-    SJF,
-    HRRN
 }

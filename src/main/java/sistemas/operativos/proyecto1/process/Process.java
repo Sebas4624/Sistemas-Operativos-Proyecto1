@@ -14,7 +14,7 @@ public class Process implements Comparable<Process> {
     private final ProcessType type;
     private final int cyclesForException;
     private final int cyclesToSatisfy;
-    private final int priority;
+    private int priority;
     private Integer startTime = null;
     private Integer finishTime = null;
     private Integer cyclesInIO;
@@ -71,6 +71,7 @@ public class Process implements Comparable<Process> {
     public int instructions() { return instructions; }
     public int remaining() { return remainingInstructions; }
     public int priority() { return priority; }
+    public void reducePriority() { if(priority > 1) priority--; }
 
     /**
      * Ejecuta una instrucción del proceso. Se disminuye la cantidad de

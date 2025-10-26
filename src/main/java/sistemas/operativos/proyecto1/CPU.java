@@ -191,7 +191,6 @@ public class CPU {
             if (!currentProcess.isRunning()) stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha puesto en ejecución.");
             currentProcess.setRunning();
             boolean executed = currentProcess.executeInstruction();
-            
             if (executed) busyCycles++; 
             
             if (config.getRemainingQuantum() == 0) {
@@ -242,12 +241,11 @@ public class CPU {
     }
     
     /**
-     * Política de planificación RR (Round Robin)
+     * Política de planificación SPN (Shortest Process Next)
      * 
-     * Se ejecutan los procesos con un valor "Quantum" asignado a cada uno de
-     * los procesos de forma equitativa, y por cada ciclo se va disminuyendo en
-     * uno. Si el "Quantum" del proceso llega a 0, se expulsa del CPU y se añade
-     * al final de la cola de listos.
+     * Se ejecutan los procesos con la menor cantidad de instrucciones primero,
+     * ejecutando los más pequeños primero y progresivamente ejecutando los
+     * procesos con mayor cantidad de instrucciones.
      */
     public void simulateCycleSPN() {
         simulationTime++;
@@ -353,6 +351,83 @@ public class CPU {
                 stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha terminado y puesto en la cola de terminados.");
                 currentProcess = null;
             } 
+        
+        
+        // 4. Esperar según la duración del ciclo configurada
+        try {
+            Thread.sleep(config.getCycleDuration());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        if (scheduler != null) scheduler.onTick(simulationTime); 
+        }
+    }
+    
+    /**
+     * Política de planificación MFQ (Multilevel Feedback Queue)
+     * 
+     * Se ejecutan los procesos con mayor nivel de prioridad y mediante un
+     * valor "quantum" asignado a cada proceso, el cual va disminuyendo por
+     * cada ciclo. Si el "Quantum" del proceso llega a 0, se expulsa del CPU,
+     * se añade al final de la cola de listos y se le disminuye el nivel de
+     * prioridad en 1 a menos de que su nivel sea igual a 1.
+     */
+    public void simulateCycleMFQ() {
+        simulationTime++;
+        
+        // 1. Procesar I/O
+        if (!externalIOThread) {
+            processIOQueue();
+        }
+        
+        // 2. Planificar siguiente proceso (si no hay uno actual)
+        if (currentProcess == null || currentProcess.isFinished() || currentProcess.isBlockedIO()) {
+            scheduleNextProcessPriority();
+        }
+        
+        if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
+            if (!currentProcess.isRunning()) stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha puesto en ejecución.");
+            currentProcess.setRunning();
+            boolean executed = currentProcess.executeInstruction();
+            if (executed) busyCycles++; 
+            
+            if (config.getRemainingQuantum() == 0) {
+                config.resetRemainingQuantum();
+                currentProcess.reducePriority();
+                readyQueue.enqueue(currentProcess);
+                
+                stats.addLog("Se ha reducido el nivel de prioridad del proceso \"" + currentProcess.name() + "\" a " + currentProcess.priority() + ".");
+                stats.addLog("Se ha terminado el quantum para el proceso \"" + currentProcess.name() + "\" y se ha puesto en la cola de listos.");
+                currentProcess = null;
+            } else {
+                config.reduceRemainingQuantum();
+            }
+
+            if (currentProcess != null) {
+                if (currentProcess.isBlockedIO()) {
+                    currentProcess.setBlocked(); 
+                    ioMutex.acquireUninterruptibly();
+                    try{
+                        ioQueue.enqueue(currentProcess);
+                    } finally {
+                        ioMutex.release();
+                    }
+
+                    System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
+                    stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha bloqueado y puesto en la cola de bloqueados.");
+                    currentProcess = null;
+
+                } else if (currentProcess.isFinished()) {
+                    currentProcess.setFinishTime((int) simulationTime);   //guarda fin
+
+                    finishedQueue.enqueue(currentProcess);
+                    this.stats.setFinishedQueue(finishedQueue.toLinkedList());
+
+                    System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
+                    stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha terminado y puesto en la cola de terminados.");
+                    currentProcess = null;
+                } 
+            }
         
         
         // 4. Esperar según la duración del ciclo configurada

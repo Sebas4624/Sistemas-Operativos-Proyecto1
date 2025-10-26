@@ -101,6 +101,21 @@ public class Simulator {
                 }
             }
             case SRT -> {
+                System.out.println("Shortest Remaining Time");
+                for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        stats.addLog("Simulación pausada.");
+                        return;
+                    }
+                    
+                    stats.setCurrentCycle();
+                    cpu.simulateCycleSPN();
+                    updateReport();
+                    if(cpu.isActive()) {
+                        stats.addLog("Simulación finalizada.");
+                        return;
+                    }
+                }
             }
             case PRI -> {
                 System.out.println("Cola por prioridad");  
@@ -120,6 +135,21 @@ public class Simulator {
                 }
             }
             case MFQ -> {
+                System.out.println("Multilevel Feedback Queue");  
+                for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        stats.addLog("Simulación pausada.");
+                        return;
+                    }
+                    
+                    stats.setCurrentCycle();
+                    cpu.simulateCycleMFQ();
+                    updateReport();
+                    if(cpu.isActive()) {
+                        stats.addLog("Simulación finalizada.");
+                        return;
+                    }
+                }
             }
             default -> throw new AssertionError(config.getPolicy().name());
         }

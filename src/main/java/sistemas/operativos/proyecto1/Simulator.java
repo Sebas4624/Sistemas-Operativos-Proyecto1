@@ -84,6 +84,21 @@ public class Simulator {
                 }
             }
             case SPN -> {
+                System.out.println("Shortest Process Next");
+                for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        stats.addLog("Simulación pausada.");
+                        return;
+                    }
+                    
+                    stats.setCurrentCycle();
+                    cpu.simulateCycleSPN();
+                    updateReport();
+                    if(cpu.isActive()) {
+                        stats.addLog("Simulación finalizada.");
+                        return;
+                    }
+                }
             }
             case SRT -> {
             }

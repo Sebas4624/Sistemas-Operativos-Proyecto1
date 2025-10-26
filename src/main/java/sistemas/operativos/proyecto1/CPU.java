@@ -191,6 +191,81 @@ public class CPU {
             if (!currentProcess.isRunning()) stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha puesto en ejecución.");
             currentProcess.setRunning();
             boolean executed = currentProcess.executeInstruction();
+            
+            if (executed) busyCycles++; 
+            
+            if (config.getRemainingQuantum() == 0) {
+                config.resetRemainingQuantum();
+                readyQueue.enqueue(currentProcess);
+                
+                stats.addLog("Se ha terminado el quantum para el proceso \"" + currentProcess.name() + "\" y se ha puesto en la cola de listos.");
+                currentProcess = null;
+            } else {
+                config.reduceRemainingQuantum();
+            }
+
+            if (currentProcess != null) {
+                if (currentProcess.isBlockedIO()) {
+                    currentProcess.setBlocked(); 
+                    ioMutex.acquireUninterruptibly();
+                    try{
+                        ioQueue.enqueue(currentProcess);
+                    } finally {
+                        ioMutex.release();
+                    }
+
+                    System.out.println("Proceso " + currentProcess.name() + " bloqueado.");
+                    stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha bloqueado y puesto en la cola de bloqueados.");
+                    currentProcess = null;
+
+                } else if (currentProcess.isFinished()) {
+                    currentProcess.setFinishTime((int) simulationTime);   //guarda fin
+
+                    finishedQueue.enqueue(currentProcess);
+                    this.stats.setFinishedQueue(finishedQueue.toLinkedList());
+
+                    System.out.println("¡Proceso " + currentProcess.name() + " terminado! :)");
+                    stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha terminado y puesto en la cola de terminados.");
+                    currentProcess = null;
+                } 
+            }
+        
+        
+        // 4. Esperar según la duración del ciclo configurada
+        try {
+            Thread.sleep(config.getCycleDuration());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        if (scheduler != null) scheduler.onTick(simulationTime); 
+        }
+    }
+    
+    /**
+     * Política de planificación RR (Round Robin)
+     * 
+     * Se ejecutan los procesos con un valor "Quantum" asignado a cada uno de
+     * los procesos de forma equitativa, y por cada ciclo se va disminuyendo en
+     * uno. Si el "Quantum" del proceso llega a 0, se expulsa del CPU y se añade
+     * al final de la cola de listos.
+     */
+    public void simulateCycleSPN() {
+        simulationTime++;
+        
+        // 1. Procesar I/O
+        if (!externalIOThread) {
+            processIOQueue();
+        }
+        
+        // 2. Planificar siguiente proceso (si no hay uno actual)
+        if (currentProcess == null || currentProcess.isFinished() || currentProcess.isBlockedIO()) {
+            scheduleNextProcessShortestProcess();
+        }
+        
+        if (currentProcess != null && (currentProcess.isReady() || currentProcess.isRunning())) {
+            if (!currentProcess.isRunning()) stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha puesto en ejecución.");
+            currentProcess.setRunning();
+            boolean executed = currentProcess.executeInstruction();
             if (executed) busyCycles++; 
 
             if (currentProcess.isBlockedIO()) {
@@ -227,7 +302,6 @@ public class CPU {
         if (scheduler != null) scheduler.onTick(simulationTime); 
         }
     }
-
     
     /**
      * Política de planificación PRI (Por prioridades; mayor número, mayor prioridad)
@@ -393,6 +467,36 @@ public class CPU {
                 currentProcess = scheduler.selectNext();
             } else if (!readyQueue.isEmpty()) {
                 currentProcess = readyQueue.pollPriority();
+                stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha puesto en cola de listos.");
+            } else {
+                currentProcess = null;
+            }
+
+            if (currentProcess != null) {
+                log("DISPATCH %s", currentProcess.name());
+                // Cambia a RUNNING
+                currentProcess.setRunning();
+                // Métricas: tiempo de espera y de primera respuesta
+                currentProcess.onDispatchedToCpu((int) simulationTime);
+                if (currentProcess.startTime() == null) {
+                    currentProcess.setStartTime((int) simulationTime);
+                }
+            }
+        } finally {
+            // Siempre liberar en el orden inverso
+            readyMutex.release();
+            cpuMutex.release();
+        }
+    }
+    
+    private void scheduleNextProcessShortestProcess() {
+        cpuMutex.acquireUninterruptibly();
+        readyMutex.acquireUninterruptibly();
+        try {
+            if (scheduler != null) {
+                currentProcess = scheduler.selectNext();
+            } else if (!readyQueue.isEmpty()) {
+                currentProcess = readyQueue.pollShortestProcess();
                 stats.addLog("Proceso \"" + currentProcess.name() + "\" se ha puesto en cola de listos.");
             } else {
                 currentProcess = null;

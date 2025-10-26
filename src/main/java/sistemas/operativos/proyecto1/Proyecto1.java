@@ -14,8 +14,10 @@ public class Proyecto1 {
 
     public static void main(String[] args) {
         Stats stats = new Stats();
-        //Config config = new Config(2000, 100, PlanPolicy.FCFS, 20);
-        Config config = new Config(2000, 100, PlanPolicy.PRI, 20);
+        Config config = new Config(2000, 100, PlanPolicy.FCFS, 20);
+        //Config config = new Config(2000, 100, PlanPolicy.RR, 20);
+        //Config config = new Config(2000, 100, PlanPolicy.SPN, 20);
+        //Config config = new Config(2000, 100, PlanPolicy.PRI, 20);
         Simulator sim = new Simulator(stats, config);
 
         JFrame simulatorView = new MainView(sim, stats);

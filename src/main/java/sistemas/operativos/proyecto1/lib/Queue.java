@@ -59,7 +59,7 @@ public class Queue<T> implements Iterable<T> {
     
     // Instructions
     
-    public Process peekShortest() {
+    public Process peekShortestProcess() {
         if (list.size() == 0) return null;
         
         Process best = null;
@@ -74,7 +74,7 @@ public class Queue<T> implements Iterable<T> {
         return best;
     }
     
-    public Process pollShortest() {
+    public Process pollShortestProcess() {
         if (list.size() == 0) return null;
         
         Process best = null;

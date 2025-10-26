@@ -16,25 +16,30 @@ public class HRRN implements Scheduler {
     private final LinkedList<Process> ready = new LinkedList<Process>();
     private final Map<String, Long> waitTicks = new HashMap<String, Long>(); // id -> espera acumulada
 
-    @Override public String name() { return "HRRN"; }
+    @Override 
+    public String name() { return "HRRN"; }
 
-    @Override public void onProcessArrived(Process p) {
+    @Override 
+    public void onProcessArrived(Process p) {
         p.setReady();
         ready.addLast(p);
         waitTicks.put(p.id(), 0L);
     }
 
-    @Override public void onProcessUnblocked(Process p) {
+    @Override 
+    public void onProcessUnblocked(Process p) {
         p.setReady();
         ready.addLast(p);
-        // si ya estaba, conserva su espera; si no, inicia en 0
-        if (!waitTicks.containsKey(p.id())) waitTicks.put(p.id(), 0L);
+        // Resetear espera al re-entrar a READY
+        waitTicks.put(p.id(), 0L);
     }
 
-    @Override public void onProcessPreempted(Process p) {
+    @Override 
+    public void onProcessPreempted(Process p) {
         p.setReady();
         ready.addLast(p);
-        if (!waitTicks.containsKey(p.id())) waitTicks.put(p.id(), 0L);
+        // Resetear espera al re-entrar a READY
+        waitTicks.put(p.id(), 0L);
     }
 
     @Override

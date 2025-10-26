@@ -7,6 +7,13 @@ package sistemas.operativos.proyecto1.gui;
 import javax.swing.JFrame;
 import sistemas.operativos.proyecto1.Simulator;
 import sistemas.operativos.proyecto1.Stats;
+import sistemas.operativos.proyecto1.PlanPolicy;
+import javax.swing.JComboBox;
+import javax.swing.JToolBar;
+import javax.swing.JLabel;
+import sistemas.operativos.proyecto1.PlanPolicy;
+import javax.swing.DefaultComboBoxModel;
+
 
 /**
  *
@@ -17,14 +24,16 @@ public class MainView extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainView.class.getName());
     private final Simulator sim;
     private final Stats stats;
-    private Thread starter;
-    private boolean running;
+    private boolean running = false;
     private JFrame configView;
     private JFrame createView;
+
     
-    // --- componentes agregados manualmente ---
+    //componentes agregados manualmente
     private javax.swing.JTextArea logArea = new javax.swing.JTextArea();
     private javax.swing.JScrollPane logScroll = new javax.swing.JScrollPane();
+
+
 
 
     /**
@@ -34,35 +43,46 @@ public class MainView extends javax.swing.JFrame {
      */
     
     public MainView(Simulator sim, Stats stats) {
-        
         initComponents();
         afterInit();
-        
-        this.sim = sim;
+
+        // 1) guardar referencias
+        this.sim   = sim;
         this.stats = stats;
-        
+
+        // 2) combo de políticas
+        String[] items = java.util.Arrays.stream(PlanPolicy.values())
+                .map(Enum::name)
+                .toArray(String[]::new);
+        planPolicySelector.setModel(new javax.swing.DefaultComboBoxModel<>(items));
+        planPolicySelector.setSelectedItem(sim.getPolicy().name());
+        planPolicySelector.addActionListener(e -> {
+            String sel = (String) planPolicySelector.getSelectedItem();
+            if (sel != null) sim.setPolicy(PlanPolicy.valueOf(sel));
+        });
+
+        // 3) vistas auxiliares
         this.configView = new ConfigView(sim, stats);
         this.createView = new CreateView(sim, stats, this);
-        
-        this.running = true;
-        this.starter = new Thread(() -> {
-            this.running = true;
-            sim.startSimulation();
-            
-            this.startButton.setEnabled(true);
-            this.pauseButton.setEnabled(false);
-            this.configButton.setEnabled(true);
-            this.createButton.setEnabled(true);
-            this.planPolicySelector.setEnabled(true);
-            this.configView.setVisible(false);
-            this.createView.setVisible(false);
-            this.running = false;
-        }, "Starter-Thread");
-        
+
+        // 4) estado inicial de la UI  ⬇⬇ (el bloque que preguntas)
+        this.running = false;                  // IMPORTANTE: inicia en false
+        startButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+        configButton.setEnabled(true);
+        createButton.setEnabled(true);
+        planPolicySelector.setEnabled(true);   // cambiar política en vivo
+
+        // 5) refrescos iniciales
         forceUpdateFields();
         updateFields();
+
+        // 6) (opcional recomendado) refrescar UI periódicamente mientras corre
+        new javax.swing.Timer(200, _e -> updateFields()).start();
     }
 
+
+        
     private void afterInit() {
         logArea.setEditable(false);
         logArea.setLineWrap(true);
@@ -900,29 +920,18 @@ public class MainView extends javax.swing.JFrame {
     }//GEN-LAST:event_fairnessFieldActionPerformed
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
-        if(!running) {
-            starter = new Thread(() -> {
-                this.running = true;
-                sim.startSimulation();
+        if (running) return;              // evita doble inicio
+        running = true;
 
-                this.startButton.setEnabled(true);
-                this.pauseButton.setEnabled(false);
-                this.configButton.setEnabled(true);
-                this.createButton.setEnabled(true);
-                this.planPolicySelector.setEnabled(true);
-                this.configView.setVisible(false);
-                this.createView.setVisible(false);
-                this.running = false;
-            }, "Starter-Thread");
-        }
-        
-        starter.start();
-        
-        this.startButton.setEnabled(false);
-        this.pauseButton.setEnabled(true);
-        this.configButton.setEnabled(false);
-        this.createButton.setEnabled(false);
-        this.planPolicySelector.setEnabled(false);
+        sim.startSimulationAsync();       // arranca (crea CPU-Thread e IO-Thread)
+
+        // Estado de controles mientras corre
+        startButton.setEnabled(false);
+        pauseButton.setEnabled(true);
+        configButton.setEnabled(false);
+        createButton.setEnabled(false);
+        // ¡Déjalo habilitado para cambiar política en vivo!
+        planPolicySelector.setEnabled(true);
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void startButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_startButtonMousePressed
@@ -954,31 +963,21 @@ public class MainView extends javax.swing.JFrame {
     }//GEN-LAST:event_currentProcessMARFieldActionPerformed
 
     private void planPolicySelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_planPolicySelectorActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_planPolicySelectorActionPerformed
 
     private void pauseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pauseButtonActionPerformed
-        starter.interrupt();
-        
-        starter = new Thread(() -> {
-            this.running = true;
-            sim.startSimulation();
-            
-            this.startButton.setEnabled(true);
-            this.pauseButton.setEnabled(false);
-            this.configButton.setEnabled(true);
-            this.createButton.setEnabled(true);
-            this.planPolicySelector.setEnabled(true);
-            this.configView.setVisible(false);
-            this.createView.setVisible(false);
-            this.running = false;
-        }, "Starter-Thread");
-        
-        this.startButton.setEnabled(true);
-        this.pauseButton.setEnabled(false);
-        this.configButton.setEnabled(true);
-        this.createButton.setEnabled(true);
-        this.planPolicySelector.setEnabled(true);
+        if (!running) return;
+        running = false;
+
+        sim.stopSimulation();             // corta hilos, imprime reporte y log
+
+        // Rehabilitar controles
+        startButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+        configButton.setEnabled(true);
+        createButton.setEnabled(true);
+        planPolicySelector.setEnabled(true);
     }//GEN-LAST:event_pauseButtonActionPerformed
 
     private void pauseButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pauseButtonMousePressed

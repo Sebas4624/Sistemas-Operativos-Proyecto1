@@ -6,15 +6,17 @@ package sistemas.operativos.proyecto1.sched;
 import sistemas.operativos.proyecto1.lib.PriorityQueue;
 import sistemas.operativos.proyecto1.process.Process;
 
+
 /**
  *
  * @author nicolepinto
  */
 public class PRI implements Scheduler {
    
-    private final PriorityQueue<Process> ready = new PriorityQueue<Process>();
 
-    @Override public String name() { return "PRIORITY(max)"; }  // mayor número = mayor prioridad
+    private final PriorityQueue<Process> ready = new PriorityQueue<>();
+
+    @Override public String name() { return "PRIORITY(max)"; }
 
     @Override public void onProcessArrived(Process p)   { p.setReady(); ready.add(p); }
     @Override public void onProcessUnblocked(Process p) { p.setReady(); ready.add(p); }
@@ -24,5 +26,4 @@ public class PRI implements Scheduler {
 
     @Override public void onTick(long cycle) { /* no-op */ }
 }
-
 

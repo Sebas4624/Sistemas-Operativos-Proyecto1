@@ -4,6 +4,7 @@ import sistemas.operativos.proyecto1.process.ProcessType;
 import sistemas.operativos.proyecto1.sched.*;
 import sistemas.operativos.proyecto1.gui.*;
 
+
 import javax.swing.JFrame;
 
 /**
@@ -15,12 +16,14 @@ public class Proyecto1 {
 
     public static void main(String[] args) {
         Stats stats = new Stats();
-        Config config = new Config(2000, 100, PlanPolicy.FCFS, 20);
-        //Config config = new Config(200, 100, PlanPolicy.RR, 20);
+        //Config config = new Config(2000, 100, PlanPolicy.FCFS, 20);
+        Config config = new Config(200);   // ciclos
+        config.setCycleDuration(100);       // ms por ciclo
+        config.setQuantum(20);
+         //Config config = new Config(200, 100, PlanPolicy.RR, 20);
         //Config config = new Config(200, 100, PlanPolicy.PRI, 20);
        
         Simulator sim = new Simulator(stats, config);
-
         JFrame simulatorView = new MainView(sim, stats);
         simulatorView.setVisible(true);
         

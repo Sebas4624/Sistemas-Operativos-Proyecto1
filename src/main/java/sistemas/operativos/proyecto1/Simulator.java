@@ -24,6 +24,7 @@ public class Simulator {
         this.config = new Config(100);
         this.cpu = new CPU(config, stats);
         this.stats = stats;
+        setPolicy(config.getPolicy());
     }
     
     /**
@@ -37,6 +38,9 @@ public class Simulator {
         this.stats = stats;
     }
     
+    public PlanPolicy getPolicy() { return config.getPolicy(); }
+
+    
     public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
         cpu.setScheduler(s);
     }
@@ -49,74 +53,91 @@ public class Simulator {
         return cpu.getEventLogArray();   // delega al CPU
     }
 
-    /**
-     * Inicia la simulación, ejecutando la función de ejecución de ciclo
-     * adecuada, dependiendo de la política de planificación actual.
-     */
+
     public void startSimulation() {
-        cpu.clearEventLog(); 
-        switch(config.getPolicy()) {
-            case PlanPolicy.FCFS -> {
-                System.out.println("First-Come, First-Served");  
-                for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
-                    if(Thread.currentThread().isInterrupted()) {
-                        cpu.pauseCPU();
-                        return;
-                    }
-                    
+        cpu.clearEventLog();
+
+        switch (config.getPolicy()) {
+
+            case FCFS -> {
+                System.out.println("First-Come, First-Served");
+                for (int i = 1; i <= config.getCyclesAmount(); i++) {
+                    if (Thread.currentThread().isInterrupted()) { cpu.pauseCPU(); return; }
                     stats.setCurrentCycle();
                     cpu.simulateCycleFCFS();
                     updateReport();
-                    if(cpu.isActive()) return;
+                    //if (cpu.isActive()) break;
                 }
             }
+
             case RR -> {
-                System.out.println("Round Robin");  
-                for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
-                    if(Thread.currentThread().isInterrupted()) {
-                        cpu.pauseCPU();
-                        return;
-                    }
-                    
+                System.out.println("Round Robin");
+                for (int i = 1; i <= config.getCyclesAmount(); i++) {
+                    if (Thread.currentThread().isInterrupted()) { cpu.pauseCPU(); return; }
                     stats.setCurrentCycle();
                     cpu.simulateCycleRR();
-                    if(cpu.isActive()) return;
-                }
-            }
-            case SRTF -> {
-                System.out.println("Shortest Remaining Time First");
-                for (int i = 1; i <= config.getCyclesAmount(); i++) {
-                    if(Thread.currentThread().isInterrupted()) {
-                        cpu.pauseCPU();
-                        return;
-                    }
-                    
-                    stats.setCurrentCycle();
-                    cpu.simulateCycleSRTF();
-                    if(cpu.isActive()) return;
+                    updateReport();
+                    //if (cpu.isActive()) break;
                 }
             }
 
             case PRI -> {
-                System.out.println("Cola por prioridad");  
-                for (int i = 1; i < config.getCyclesAmount() + 1; i++) {
-                    if(Thread.currentThread().isInterrupted()) {
-                        cpu.pauseCPU();
-                        return;
-                    }
-                    
+                System.out.println("Cola por prioridad");
+                for (int i = 1; i <= config.getCyclesAmount(); i++) {
+                    if (Thread.currentThread().isInterrupted()) { cpu.pauseCPU(); return; }
                     stats.setCurrentCycle();
                     cpu.simulateCyclePRI();
-                    if(cpu.isActive()) return;
+                    updateReport();
+                    //if (cpu.isActive()) break;
                 }
             }
-            case MFQ -> {
+
+            // SPN ≡ SJF 
+            case SJF, SPN -> {
+                System.out.println("Shortest Job First (non-preemptive)");
+                for (int i = 1; i <= config.getCyclesAmount(); i++) {
+                    if (Thread.currentThread().isInterrupted()) { cpu.pauseCPU(); return; }
+                    stats.setCurrentCycle();
+                    cpu.simulateCycleFCFS();   // usa el scheduler SJF que ya seteaste
+                    updateReport();
+                    //if (cpu.isActive()) break;
+                }
             }
+
+            case SRTF, SRT -> {
+                System.out.println("Shortest Remaining Time First (preemptive)");
+                for (int i = 1; i <= config.getCyclesAmount(); i++) {
+                    if (Thread.currentThread().isInterrupted()) { cpu.pauseCPU(); return; }
+                    stats.setCurrentCycle();
+                    cpu.simulateCycleSRTF();
+                    updateReport();
+                    //if (cpu.isActive()) break;
+                }
+            }
+
+            case HRRN -> {
+                System.out.println("Highest Response Ratio Next");
+                for (int i = 1; i <= config.getCyclesAmount(); i++) {
+                    if (Thread.currentThread().isInterrupted()) { cpu.pauseCPU(); return; }
+                    stats.setCurrentCycle();
+                    cpu.simulateCycleFCFS();   // usa el scheduler HRRN que ya seteaste
+                    updateReport();
+                    //if (cpu.isActive()) break;
+                }
+            }
+
+            case MFQ -> {
+                System.out.println("MFQ (pendiente de implementar)");
+                
+            }
+
             default -> throw new AssertionError(config.getPolicy().name());
         }
+
         printReport();
         dumpLogToFile();
     }
+
     
     /**
      * Crea un proceso dentro del simulador para ser usado y ejecutado dentro
@@ -135,13 +156,29 @@ public class Simulator {
             default -> cpu.createProcess(name, arrivalTime, instructions, type, cyclesForException, cyclesToSatisfy, priority);
         }
     }
-    
+    public void setPolicy(PlanPolicy p) {
+        this.config.setPolicy(p);
+
+        switch (p) {
+            case FCFS -> setScheduler(new sistemas.operativos.proyecto1.sched.FCFS());
+            case RR   -> setScheduler(new sistemas.operativos.proyecto1.sched.RR(config));
+            case PRI  -> setScheduler(new sistemas.operativos.proyecto1.sched.PRI());
+            case SJF, SPN -> setScheduler(new sistemas.operativos.proyecto1.sched.SJF());
+            case SRTF, SRT -> setScheduler(new sistemas.operativos.proyecto1.sched.SRTF());
+            case HRRN -> setScheduler(new sistemas.operativos.proyecto1.sched.HRRN());
+            default -> setScheduler(null);
+        }
+        //limpiar el log al cambiar política
+        cpu.forceRescheduleOnPolicyChange();
+        System.out.println("Scheduler -> " + p.name());
+        cpu.clearEventLog();
+    }
+
     public void printReport() {
         LinkedList<sistemas.operativos.proyecto1.process.Process> procs = cpu.getAllProcesses();
         int n = procs.size();
         if (n == 0) {
             System.out.println("No hay procesos para reportar.");
-            // también conviene resetear stats a 0 aquí si quieres
             stats.setTotalProcesses(0);
             stats.setCompletedProcesses(0);
             stats.setAvgWait(0);
@@ -314,16 +351,24 @@ public class Simulator {
 
         cpuThread = new Thread(() -> {
             while (running) {
+                // 1) Ejecuta 1 ciclo según la política actual
                 switch (config.getPolicy()) {
-                    case PlanPolicy.FCFS -> cpu.simulateCycleFCFS();
-                    case PlanPolicy.RR   -> cpu.simulateCycleRR();
-                    case PlanPolicy.PRI  -> cpu.simulateCyclePRI();
-                    case PlanPolicy.SRTF -> cpu.simulateCycleSRTF();
-                    // Si todavía no tienes loop específico:
-                    case PlanPolicy.SJF  -> cpu.simulateCycleFCFS();   
-                    case PlanPolicy.HRRN -> cpu.simulateCycleFCFS();   
-                    default -> throw new AssertionError(config.getPolicy().name());
+                    case FCFS -> cpu.simulateCycleFCFS();
+                    case RR   -> cpu.simulateCycleRR();
+                    case PRI  -> cpu.simulateCyclePRI();
+                    case SJF, SPN -> cpu.simulateCycleFCFS();
+                    case SRTF, SRT -> cpu.simulateCycleSRTF();
+                    case HRRN -> cpu.simulateCycleFCFS();
+                    case MFQ -> cpu.simulateCycleFCFS(); // fallback temporal
+                    default -> { /* opcional: pequeño sleep */ }
                 }
+
+                // 2) Actualiza métricas (lo que hacía la versión síncrona)
+                stats.setCurrentCycle();
+                updateReport();
+
+                // (opcional) si ya no hay nada por hacer, puedes salir
+                // if (cpu.isActive()) break;
             }
         }, "CPU-Thread");
 
@@ -337,7 +382,9 @@ public class Simulator {
 
         cpuThread.start();
         ioThread.start();
-     }
+    }
+
+
 
     public void stopSimulation() {
         running = false;

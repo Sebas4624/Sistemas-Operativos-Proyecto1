@@ -157,12 +157,25 @@ public class Process implements Comparable<Process> {
     public void setFinishTime(int t) { finishTime = t; }
 
     public boolean finished() { return remainingInstructions == 0; }
-
+    
     @Override
     public int compareTo(Process o) {
-        //return Integer.compare(this.priority, o.priority());
-        return Integer.compare(this.priority, o.priority());
+        int byPri = Integer.compare(o.priority(), this.priority());
+        if (byPri != 0) return byPri;
+
+        Integer a = this.arrival();
+        Integer b = o.arrival();
+        if (a == null && b == null) return 0;
+        if (a == null) return 1;           
+        if (b == null) return -1;
+        return Integer.compare(a, b);
     }
+
+    //@Override
+    //public int compareTo(Process o) {
+        //return Integer.compare(this.priority, o.priority());
+        //return Integer.compare(this.priority, o.priority());
+    //}
 
     @Override
     public String toString() {

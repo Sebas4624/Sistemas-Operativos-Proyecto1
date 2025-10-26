@@ -36,15 +36,30 @@ public class CPU {
     }
 
     
-    // Si true, la E/S la hará un hilo externo (no se llama processIOQueue() desde CPU):
     private volatile boolean externalIOThread = false;
     public void enableExternalIOThread(boolean v) { this.externalIOThread = v; }
     
     public long getBusyCycles() { return busyCycles; }
 
-    public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
-        this.scheduler = s;
+    public void forceRescheduleOnPolicyChange() {
+    cpuMutex.acquireUninterruptibly();
+    try {
+        if (scheduler == null) return;
+
+        if (currentProcess != null) {
+            // reencola el actual según la nueva política
+            currentProcess.onEnqueuedReady((int) simulationTime);
+            scheduler.onProcessPreempted(currentProcess);
+            currentProcess = null; // obliga a seleccionar con la política nueva
+        }
+
+        // migrar colas legacy → scheduler (por si la UI creó procesos antes)
+        setScheduler(this.scheduler); // reutiliza tu propio método que ya migra todo
+    } finally {
+        cpuMutex.release();
     }
+}
+
     
         //log
     private final LinkedList<String>  eventLog     = new LinkedList<>();
@@ -514,6 +529,34 @@ public class CPU {
             ioMutex.release();
         }
     }
+    public void setScheduler(sistemas.operativos.proyecto1.sched.Scheduler s) {
+        this.scheduler = s;
+        if (this.scheduler == null) return; 
+
+        readyMutex.acquireUninterruptibly();
+        try {
+            LinkedList<Process> fifoSnapshot = readyQueue.toLinkedList();
+            while (!readyQueue.isEmpty()) readyQueue.dequeue();
+
+            for (Process p : fifoSnapshot) {
+                p.onEnqueuedReady((int) simulationTime);
+                scheduler.onProcessArrived(p);
+            }
+
+            java.util.ArrayList<Process> priSnapshot = new java.util.ArrayList<>();
+            while (!readyPriorityQueue.isEmpty()) {
+                Process p = readyPriorityQueue.poll(); 
+                if (p != null) priSnapshot.add(p);
+            }
+            for (Process p : priSnapshot) {
+                p.onEnqueuedReady((int) simulationTime);
+                scheduler.onProcessArrived(p);
+            }
+        } finally {
+            readyMutex.release();
+        }
+    }
+
 
     private void scheduleNextProcess() {
         cpuMutex.acquireUninterruptibly();
@@ -529,16 +572,17 @@ public class CPU {
 
             if (currentProcess != null) {
                 log("DISPATCH %s", currentProcess.name());
-                // Cambia a RUNNING
                 currentProcess.setRunning();
-                // Métricas: tiempo de espera y de primera respuesta
                 currentProcess.onDispatchedToCpu((int) simulationTime);
                 if (currentProcess.startTime() == null) {
                     currentProcess.setStartTime((int) simulationTime);
                 }
+                // RR: resetear quantum al despachar
+                if (config.getPolicy() == PlanPolicy.RR) {
+                    config.resetRemainingQuantum();
+                }
             }
         } finally {
-            // Siempre liberar en el orden inverso
             readyMutex.release();
             cpuMutex.release();
         }
